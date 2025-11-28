@@ -4,6 +4,8 @@ const express = require("express");
 const cors = require("cors");
 const bodyparser = require("body-parser");
 const dotenv = require("dotenv");
+const users=require("./routes/users/user");
+const role=require("./routes/users/role");
 
 dotenv.config();
 const port = process.env.PORT;
@@ -14,6 +16,9 @@ app.use(cors());
 app.use(express.json());
 app.use(bodyparser.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/',users);
+app.use('/',role);
+
 
 
 
