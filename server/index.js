@@ -1,14 +1,22 @@
-const express = require('express');
-const cors = require('cors');
-const bodyparser = require('body-parser');
-const dotenv = require('dotenv');
+// server/app.js (entry)
+const connection = require("./connection/connection");
+const express = require("express");
+const cors = require("cors");
+const bodyparser = require("body-parser");
+const dotenv = require("dotenv");
+const properties = require("./routes/properties/properties"); // adjust path
+
+dotenv.config();
+
+const port = process.env.PORT || 4500;
+const URL = process.env.URL || `http://localhost:${port}`;
+
 
 dotenv.config();
 const authRoutes = require('./routes/authRoutes/authRoutes');
 const { blacklistExpiredRefresh, deleteBlacklistedOlder } = require('./utils/tokenCleanup');
 
 const app = express();
-const port = process.env.PORT || 4500;
 
 app.use(cors());
 app.use(express.json());
@@ -17,6 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // mount auth routes at /auth
 app.use('/', authRoutes);
+app.use('/',properties)
 
 // server listen (pool already connects on module load)
 app.listen(port, () => {
