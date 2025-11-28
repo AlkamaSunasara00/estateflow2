@@ -13,6 +13,9 @@ import AddCategory from "../../pages/admin/category/AddCategory";
 import CreateCoupon from "../../pages/admin/coupon/CreateCoupon";
 import AddNewAdmin from "../../pages/admin/manage_admin/AddNewAdmin";
 import AddNewCustomer from "../../pages/admin/customers/AddNewCustomer";
+import Properties from "../../pages/admin/properties/Properties";
+import AddProperty from "../../pages/admin/properties/AddProperties";
+import EditProperty from "../../pages/admin/properties/UpdateProperties";
 
 const DashboardRoute = () => {
   return (
@@ -20,6 +23,9 @@ const DashboardRoute = () => {
       <Routes>
         <Route path="/admin/dashboard" element={<Dashboard />} />
         <Route path="/admin/product" element={<Product />} />
+        <Route path="/admin/properties" element={<Properties />} />
+        <Route path="/admin/addproperty" element={<AddProperty />} />
+        <Route path="/admin/properties/edit/:id" element={<EditProperty />} />
         <Route path="/admin/category" element={<Category />} />
         <Route path="/admin/orders" element={<Order />} />
         <Route path="/admin/coupon" element={<Coupon />} />
