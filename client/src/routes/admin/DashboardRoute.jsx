@@ -1,5 +1,5 @@
-import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import ProtectedRoute from "./ProtectedRoute";
 import "../../assets/css/main.css";
 import Dashboard from "../../pages/admin/dashboard/Dashboard";
 import Product from "../../pages/admin/product/Product";
@@ -14,10 +14,19 @@ import CreateCoupon from "../../pages/admin/coupon/CreateCoupon";
 import AddNewAdmin from "../../pages/admin/manage_admin/AddNewAdmin";
 import AddNewCustomer from "../../pages/admin/customers/AddNewCustomer";
 
+import Login from "../../pages/admin/login/Login";
+import LogoutPage from "../../pages/admin/login/Logout";
+
 const DashboardRoute = () => {
   return (
-    <>
-      <Routes>
+    <Routes>
+      <Route path="/login" element={<Navigate to="/admin/login" replace />} />
+      <Route path="/" element={<Navigate to="/admin/login" replace />} />
+
+      <Route path="/admin/login" element={<Login />} />
+
+      <Route element={<ProtectedRoute />}>
+
         <Route path="/admin/dashboard" element={<Dashboard />} />
         <Route path="/admin/product" element={<Product />} />
         <Route path="/admin/category" element={<Category />} />
@@ -30,8 +39,14 @@ const DashboardRoute = () => {
         <Route path="/admin/create-coupon" element={<CreateCoupon />} />
         <Route path="/admin/add-new_admin" element={<AddNewAdmin />} />
         <Route path="/admin/add-new_customer" element={<AddNewCustomer />} />
-      </Routes>
-    </>
+        <Route
+          path="/logout"
+          element={<LogoutPage />}
+        />
+
+      </Route>
+
+    </Routes>
   );
 };
 

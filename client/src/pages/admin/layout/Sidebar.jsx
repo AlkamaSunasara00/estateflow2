@@ -74,6 +74,7 @@ const Sidebar = () => {
                 <FiLogOut />
                 Logout
               </NavLink>
+
             </li>
           </ul>
         </div>
