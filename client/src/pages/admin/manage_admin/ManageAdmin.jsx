@@ -13,7 +13,7 @@ import AdminProfile from "../../../assets/image/dash-profile.png";
 // axios instance
 import api from "../../../api/axiosInstance";
 
-const PAGE_SIZE = 4;
+const PAGE_SIZE = 5;
 
 const ManageAdmin = () => {
   const [admins, setAdmins] = useState([]);
@@ -93,7 +93,7 @@ const ManageAdmin = () => {
   };
 
   const handleEdit = (admin) => {
-    navigate("/admin/edit-admin", { state: { admin } });
+    navigate("/admin/edit-client", { state: { admin } });
   };
 
   /* ===================== FILTER BY TABS ===================== */
@@ -147,9 +147,9 @@ const ManageAdmin = () => {
       <Navbar />
       <main className="admin-panel-header-div">
         <Breadcrumb
-          title="Admin"
-          breadcrumbText="Admin List"
-          button={{ link: "/admin/add-new_admin", text: "Add New Admin" }}
+          title="Clients"
+          breadcrumbText="clients List"
+          button={{ link: "/admin/add-new_client", text: "Add New Client" }}
         />
 
         {/* TABS */}

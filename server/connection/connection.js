@@ -15,9 +15,23 @@ connection.getConnection((err, conn) => {
   if (err) {
     console.error('Database  connection failed:', err);
     return;
+
   }
   console.log('Database  connected successfully');
   conn.release(); // Release the connection back to the pool
 });
 
 module.exports = connection;
+
+
+
+
+
+
+
+
+
+
+
+
+
