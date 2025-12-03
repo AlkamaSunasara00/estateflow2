@@ -129,7 +129,7 @@ const AddNewAdmin = () => {
           style={{ marginBottom: "24px" }}
         >
           <div>
-            <h5>Add Admin</h5>
+            <h5>Add Client</h5>
             <div className="admin-panel-breadcrumb">
               <Link to="/admin/dashboard" className="breadcrumb-link active">
                 Dashboard
