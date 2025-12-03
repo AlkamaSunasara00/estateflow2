@@ -1,8 +1,8 @@
-// src/pages/admin/login/Login.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../../api/axiosInstance";
 import "../../../assets/css/admin/login.css";
+import logo from "../../../assets/image/logo.png"
 
 const Login = () => {
   const nav = useNavigate();
@@ -25,36 +25,53 @@ const Login = () => {
   };
 
   return (
-    <div className="container">
-      <div className="login-container">
-        <div className="login-section">
-          <div className="login-heading ">
-            <h5>Login</h5>
-          </div>
-          <div className="Login-form">
-            <form onSubmit={submitLogin}>
-              <div className="login-input">
-                <input
-                  type="email"
-                  placeholder="Email"
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+    <>
+
+
+      <div className="login-wrapper">
+        <div className="login-container">
+          <div className="login-header">
+            <div>
+              <div className="login-title">
+                Welcome back
               </div>
-              <div className="login-input">
+              <div>
+                <p className="login-subtitle">Login to continue</p>
+              </div>
+            </div>
+            <div className="login-icon">
+              <img src={logo} alt="" />
+            </div>
+          </div>
+
+          <div className="login-form">
+            <div className="form-group">
+              <label className="form-label">Email</label>
+              <input
+                type="email"
+                placeholder="Email"
+                  className="form-input"
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Password</label>
                 <input
                   type="password"
+                  className="form-input"
                   placeholder="Password"
                   onChange={(e) => setPassword(e.target.value)}
                 />
-              </div>
-              <div className="login-button">
-                <button type="submit" className="primary-btn">Login</button>
-              </div>
-            </form>
+            </div>
+
+            <button type="submit" className="login-button" onClick={submitLogin}>
+              Login
+            </button>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
