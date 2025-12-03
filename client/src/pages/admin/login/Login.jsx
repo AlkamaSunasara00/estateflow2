@@ -17,7 +17,7 @@ const Login = () => {
       localStorage.setItem("accessToken", res.data.accessToken);
       localStorage.setItem("refreshToken", res.data.refreshToken);
 
-      nav("/admin/dashboard");
+      nav("/admin/manage-clients");
     } catch (err) {
       alert(err.response?.data?.error || "Login failed");
     }

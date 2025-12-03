@@ -7,6 +7,7 @@ import { HiXMark } from "react-icons/hi2";
 
 // ⬇️ axios instance import
 import api from "../../../api/axiosInstance";
+import { IoMdArrowDropright } from "react-icons/io";
 
 const EditAdmin = () => {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ const EditAdmin = () => {
 
   useEffect(() => {
     if (!admin) {
-      navigate("/admin/manage-admins");
+      navigate("/admin/manage-clients");
       return;
     }
 
@@ -159,7 +160,7 @@ const EditAdmin = () => {
         )
       );
 
-      navigate("/admin/manage-admins");
+      navigate("/admin/manage-clients");
     } catch (err) {
       console.error("Failed to update admin:", err);
     } finally {
@@ -179,20 +180,22 @@ const EditAdmin = () => {
           style={{ marginBottom: "24px" }}
         >
           <div>
-            <h5>Edit Admin</h5>
+            <h5>Edit Client</h5>
             <div className="admin-panel-breadcrumb">
               <Link to="/admin/dashboard" className="breadcrumb-link active">
-                Dashboard
+                Dashboard 
               </Link>
-              <Link to="/admin/manage-admins" className="breadcrumb-link active">
-                Admin List
+              <IoMdArrowDropright />
+              <Link to="/admin/manage-clients" className="breadcrumb-link active">
+                 Clients List
               </Link>
-              <span className="breadcrumb-text">Edit Admin</span>
+              <IoMdArrowDropright />
+              <span className="breadcrumb-text">Edit Client</span>
             </div>
           </div>
           <div className="admin-panel-header-add-buttons">
             <NavLink
-              to="/admin/manage-admins"
+              to="/admin/manage-clients"
               className="cancel-btn dashboard-add-product-btn"
             >
               <HiXMark /> Cancel
@@ -306,7 +309,7 @@ const EditAdmin = () => {
             <div className="dashboard-add-content-card">
               <h6>Status</h6>
               <div className="add-product-form-container">
-                <label htmlFor="edit-admin-status">Admin Status</label>
+                <label htmlFor="edit-admin-status">Client Status</label>
                 <select
                   id="edit-admin-status"
                   value={status}

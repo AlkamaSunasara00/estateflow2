@@ -189,20 +189,86 @@ const updateUser = (req, res) => {
 };
 
 // -------------------- DELETE USER --------------------
+// const deleteUser = (req, res) => {
+//   const { id } = req.params;
+
+//   // Remove role assignment first
+//   connection.query("DELETE FROM users_roles WHERE user_id=?", [id], () => {
+//     connection.query("DELETE FROM users WHERE id=?", [id], (err, result) => {
+//       if (err) return res.status(500).json({ error: "database error" });
+
+//       return res.status(200).json({
+//         message: "user deleted + role mappings removed",
+//       });
+//     });
+//   });
+// };
+
 const deleteUser = (req, res) => {
   const { id } = req.params;
 
-  // Remove role assignment first
-  connection.query("DELETE FROM users_roles WHERE user_id=?", [id], () => {
-    connection.query("DELETE FROM users WHERE id=?", [id], (err, result) => {
-      if (err) return res.status(500).json({ error: "database error" });
+  // pool se connection lo
+  connection.getConnection((err, conn) => {
+    if (err) {
+      console.error("GET CONNECTION ERROR:", err);
+      return res.status(500).json({ error: "connection error" });
+    }
 
-      return res.status(200).json({
-        message: "user deleted + role mappings removed",
+    // transaction start
+    conn.beginTransaction((err) => {
+      if (err) {
+        conn.release();
+        return res.status(500).json({ error: "transaction start error" });
+      }
+
+      const deleteUserRolesQ = "DELETE FROM users_roles WHERE user_id = ?";
+
+      conn.query(deleteUserRolesQ, [id], (err) => {
+        if (err) {
+          return conn.rollback(() => {
+            conn.release();
+            res.status(500).json({ error: "error deleting user roles" });
+          });
+        }
+
+        const deleteUserQ = "DELETE FROM users WHERE id = ?";
+
+        conn.query(deleteUserQ, [id], (err, result) => {
+          if (err) {
+            return conn.rollback(() => {
+              conn.release();
+              res.status(500).json({ error: "error deleting user" });
+            });
+          }
+
+          if (result.affectedRows === 0) {
+            return conn.rollback(() => {
+              conn.release();
+              res.status(404).json({ error: "user not found" });
+            });
+          }
+
+          // commit final changes
+           conn.commit((err) => {
+            if (err) {
+              return conn.rollback(() => {
+                conn.release();
+                res.status(500).json({ error: "commit error" });
+              });
+            }
+
+            conn.release();
+            return res.status(200).json({
+              message: "User + related roles deleted successfully",
+            });
+          });
+        });
       });
     });
   });
 };
+
+
 
 module.exports = {
   getUsers,

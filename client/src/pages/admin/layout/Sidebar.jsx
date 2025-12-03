@@ -60,9 +60,9 @@ const Sidebar = () => {
           <h6>USER MANAGEMENT</h6>
           <ul>
             <li>
-              <NavLink to="/admin/manage-admins">
+              <NavLink to="/admin/manage-clients">
                 <RiAdminLine />
-                Manage Users
+                Clients
               </NavLink>
             </li>
           </ul>

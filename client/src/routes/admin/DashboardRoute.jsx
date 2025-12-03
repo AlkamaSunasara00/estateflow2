@@ -36,14 +36,13 @@ const DashboardRoute = () => {
         <Route path="/admin/category" element={<Category />} />
         <Route path="/admin/orders" element={<Order />} />
         <Route path="/admin/coupon" element={<Coupon />} />
-        <Route path="/admin/manage-admins" element={<ManageAdmin />} />
+        <Route path="/admin/manage-clients" element={<ManageAdmin />} />
         <Route path="/admin/customers" element={<Customer />} />
         <Route path="/admin/add-product" element={<AddProduct />} />
         <Route path="/admin/add-category" element={<AddCategory />} />
         <Route path="/admin/create-coupon" element={<CreateCoupon />} />
-        <Route path="/admin/add-new_admin" element={<AddNewAdmin />} />
-        <Route path="/admin/edit-admin" element={<EditAdmin />} />
-        <Route path="/admin/add-new_customer" element={<AddNewCustomer />} />
+        <Route path="/admin/add-new_client" element={<AddNewAdmin />} />
+        <Route path="/admin/edit-client" element={<EditAdmin />} />
         <Route path="/logout" element={<LogoutPage />} />
       </Route>
     </Routes>

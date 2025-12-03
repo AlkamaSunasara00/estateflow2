@@ -111,9 +111,9 @@ const AddNewAdmin = () => {
         );
       }
 
-      navigate("/admin/manage-admins");
+      navigate("/admin/manage-clients");
     } catch (err) {
-      console.error("Failed to save admin:", err);
+      console.error("Failed to save client:", err);
     } finally {
       setSubmitting(false);
     }
@@ -135,16 +135,16 @@ const AddNewAdmin = () => {
                 Dashboard
               </Link>
               <IoMdArrowDropright />
-              <Link to="/admin/manage-admins" className="breadcrumb-link active">
-                Admin List
+              <Link to="/admin/manage-clients" className="breadcrumb-link active">
+                Clients List
               </Link>
               <IoMdArrowDropright />
-              <span className="breadcrumb-text">Add Admin</span>
+              <span className="breadcrumb-text">Add Client</span>
             </div>
           </div>
           <div className="admin-panel-header-add-buttons">
             <NavLink
-              to="/admin/manage-admins"
+              to="/admin/manage-clients"
               className="cancel-btn dashboard-add-product-btn"
             >
               <HiXMark /> Cancel
@@ -154,7 +154,7 @@ const AddNewAdmin = () => {
               onClick={handleSubmit}
               disabled={submitting}
             >
-              <MdSave /> {submitting ? "Saving..." : "Save Admin"}
+              <MdSave /> {submitting ? "Saving..." : "Save client"}
             </button>
           </div>
         </div>
@@ -271,7 +271,7 @@ const AddNewAdmin = () => {
             <div className="dashboard-add-content-card">
               <h6>Status</h6>
               <div className="add-product-form-container">
-                <label htmlFor="admin-status">Admin Status</label>
+                <label htmlFor="admin-status">Client Status</label>
                 <select
                   id="admin-status"
                   name="status"
