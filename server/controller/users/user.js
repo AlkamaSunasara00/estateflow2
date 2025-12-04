@@ -198,21 +198,6 @@ const updateUser = (req, res) => {
   });
 };
 
-// -------------------- DELETE USER --------------------
-// const deleteUser = (req, res) => {
-//   const { id } = req.params;
-
-//   // Remove role assignment first
-//   connection.query("DELETE FROM users_roles WHERE user_id=?", [id], () => {
-//     connection.query("DELETE FROM users WHERE id=?", [id], (err, result) => {
-//       if (err) return res.status(500).json({ error: "database error" });
-
-//       return res.status(200).json({
-//         message: "user deleted + role mappings removed",
-//       });
-//     });
-//   });
-// };
 
 const deleteUser = (req, res) => {
   const { id } = req.params;
@@ -278,12 +263,24 @@ const deleteUser = (req, res) => {
   });
 };
 
+const trashUser = (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
 
+  connection.query("UPDATE users SET status =? WHERE id =? ", [status, id], (err, result) => {
+    if (err) {
+      return res.status(500);
+    } else {
+      return res.json(result)
+    }
+  });
+};
 
 module.exports = {
   getUsers,
   getUserById,
   addUser,
   updateUser,
+  trashUser,
   deleteUser,
 };

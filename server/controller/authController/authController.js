@@ -86,7 +86,7 @@ const refreshAccessToken = (req, res) => {
     SELECT * FROM active_tokens
     WHERE refresh_token = ? AND is_blacklisted = 0
     LIMIT 1
-  `;
+    `;
 
   connection.query(sql, [refreshToken], (err, rows) => {
     if (err) return res.status(500).json({ error: "DB error" });
@@ -125,11 +125,11 @@ const refreshAccessToken = (req, res) => {
 
       const upd = `
         UPDATE active_tokens SET 
-          access_token = ?, 
-          access_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE),
-          last_activity = NOW()
+          access_token = ?,
+    access_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE),
+    last_activity = NOW()
         WHERE refresh_token = ?
-      `;
+    `;
 
       connection.query(upd, [newAccess, refreshToken], () => {
         return res.json({ accessToken: newAccess });
@@ -155,7 +155,7 @@ const me = (req, res) => {
 
   const userSQL = `
     SELECT id, name, email FROM users WHERE id = ? LIMIT 1
-  `;
+    `;
 
   connection.query(userSQL, [id], (err, rows) => {
     if (err) return res.status(500).json({ error: "DB error" });
@@ -181,5 +181,8 @@ const me = (req, res) => {
     });
   });
 };
+
+
+
 
 module.exports = { login, refreshAccessToken, logout, me };
