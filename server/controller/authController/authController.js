@@ -16,7 +16,11 @@ const login = (req, res) => {
   const agent = req.headers["user-agent"];
 
   connection.query(
-    "SELECT * FROM users WHERE email = ? LIMIT 1",
+    `
+    SELECT * 
+    FROM users 
+    WHERE email = ? 
+      AND status='active'`,
     [email],
     (err, rows) => {
       if (err) return res.status(500).json({ error: "DB error" });
@@ -33,7 +37,7 @@ const login = (req, res) => {
         FROM users_roles ur
         JOIN roles r ON ur.role_id = r.id
         WHERE ur.user_id = ?
-      `;
+    `;
 
       connection.query(roleSQL, [user.id], (roleErr, rRows) => {
         if (roleErr)
@@ -47,10 +51,10 @@ const login = (req, res) => {
         const refreshToken = generateRefreshToken(userPayload);
 
         const insertSQL = `
-          INSERT INTO active_tokens 
-          (access_token, refresh_token, user_id, ip_address, user_agent, last_activity, is_blacklisted, access_expires_at, refresh_expires_at)
-          VALUES (?, ?, ?, ?, ?, NOW(), 0, DATE_ADD(NOW(), INTERVAL 15 MINUTE), DATE_ADD(NOW(), INTERVAL 7 DAY))
-        `;
+          INSERT INTO active_tokens
+    (access_token, refresh_token, user_id, ip_address, user_agent, last_activity, is_blacklisted, access_expires_at, refresh_expires_at)
+          VALUES(?, ?, ?, ?, ?, NOW(), 0, DATE_ADD(NOW(), INTERVAL 15 MINUTE), DATE_ADD(NOW(), INTERVAL 7 DAY))
+      `;
 
         connection.query(
           insertSQL,
@@ -80,7 +84,7 @@ const refreshAccessToken = (req, res) => {
     SELECT * FROM active_tokens
     WHERE refresh_token = ? AND is_blacklisted = 0
     LIMIT 1
-  `;
+    `;
 
   connection.query(sql, [refreshToken], (err, rows) => {
     if (err) return res.status(500).json({ error: "DB error" });
@@ -119,11 +123,11 @@ const refreshAccessToken = (req, res) => {
 
       const upd = `
         UPDATE active_tokens SET 
-          access_token = ?, 
-          access_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE),
-          last_activity = NOW()
+          access_token = ?,
+    access_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE),
+    last_activity = NOW()
         WHERE refresh_token = ?
-      `;
+    `;
 
       connection.query(upd, [newAccess, refreshToken], () => {
         return res.json({ accessToken: newAccess });
@@ -149,7 +153,7 @@ const me = (req, res) => {
 
   const userSQL = `
     SELECT id, name, email FROM users WHERE id = ? LIMIT 1
-  `;
+    `;
 
   connection.query(userSQL, [id], (err, rows) => {
     if (err) return res.status(500).json({ error: "DB error" });
@@ -175,6 +179,9 @@ const me = (req, res) => {
     });
   });
 };
+
+
+
 
 module.exports = { login, refreshAccessToken, logout, me };
     
