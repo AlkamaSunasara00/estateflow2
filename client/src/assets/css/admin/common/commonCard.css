@@ -1,0 +1,200 @@
+/* src/components/common-card.css
+   Uses variables from your main.css (:root)
+*/
+
+.common-card {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: var(--white-color);
+  border: 1px solid var(--primary-border-color);
+  border-radius: 10px;
+  padding: 14px 16px;
+  gap: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  color: var(--primary-font-color);
+  font-family: var(--primary-font);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+/* hover + active */
+.common-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  border-color: rgba(56,88,214,0.12); /* soft accent using primary btn */
+}
+.common-card:active {
+  transform: translateY(0);
+}
+
+/* left - avatar container */
+.common-card__left {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* avatar size */
+.common-card__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--light-white-color);
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+/* responsive smaller avatar */
+.common-card--compact .common-card__avatar {
+  width: 44px;
+  height: 44px;
+}
+
+/* avatar image fits */
+.common-card__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* placeholder when no image provided */
+.common-card__avatar--placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f0f1f3 0%, #e8e9ec 100%);
+}
+
+/* center body */
+.common-card__body {
+  flex: 1 1 auto;
+  min-width: 0; /* allow truncation */
+}
+
+/* title */
+.common-card__title {
+  font-family: var(--secondary-font);
+  font-weight: 600;
+  font-size: 16px;
+  color: #15171a;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* subtitle */
+.common-card__subtitle {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--primary-font-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* right side meta + chevron */
+.common-card__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* meta text (phone/price/etc) */
+.common-card__meta {
+  font-weight: 600;
+  font-size: 14px;
+  color: #191c1f;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+/* chevron style */
+.common-card__chev {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-font-color);
+  opacity: 0.85;
+}
+
+/* make chevron more subtle */
+.common-card__chev svg {
+  display: block;
+}
+
+/* -------------------------------------------------
+   Responsive rules
+   - Desktop default
+   - Tablet: slightly larger paddings, avatar same
+   - Mobile: compact layout
+--------------------------------------------------*/
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .common-card {
+    padding: 16px 18px;
+    border-radius: 12px;
+  }
+
+  .common-card__avatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  .common-card__title {
+    font-size: 17px;
+  }
+
+  .common-card__meta {
+    font-size: 15px;
+  }
+}
+
+/* Mobile: stack-friendly, tighter spacing */
+@media (max-width: 767px) {
+  .common-card {
+    padding: 10px 12px;
+    gap: 10px;
+    border-radius: 8px;
+  }
+
+  .common-card__avatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .common-card__title {
+    font-size: 15px;
+  }
+
+  .common-card__subtitle {
+    font-size: 12px;
+  }
+
+  .common-card__meta {
+    font-size: 13px;
+  }
+
+  /* if you need an ultra-compact look */
+  .common-card--compact {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+}
+
+/* Accessibility + focus */
+.common-card:focus {
+  outline: 3px solid rgba(56,88,214,0.12);
+  outline-offset: 2px;
+}
+
+/* small helper variant: bordered-left badge */
+.common-card--accent {
+  border-left: 4px solid var(--primary-btn-bg);
+}

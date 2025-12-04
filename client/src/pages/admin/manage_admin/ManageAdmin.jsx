@@ -1,3 +1,4 @@
+// src/pages/admin/manage/ManageAdmin.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { HiOutlineArrowLeft, HiOutlineArrowRight } from "react-icons/hi";
@@ -8,10 +9,13 @@ import { IoPencil } from "react-icons/io5";
 import Sidebar from "../layout/Sidebar";
 import Navbar from "../layout/Navbar";
 import Breadcrumb from "../layout/Breadcrumb";
-import AdminProfile from "../../../assets/image/dash-profile.png";
 
 // axios instance
 import api from "../../../api/axiosInstance";
+
+// styles + CommonCard
+import "../../../assets/css/admin/pages/manageAdmin.css";
+import CommonCard from "../common/CommonCard";
 
 const PAGE_SIZE = 5;
 
@@ -21,7 +25,7 @@ const ManageAdmin = () => {
   const [activeTab, setActiveTab] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // ✅ yaha pe userId -> "seller, buyer" jaisa map rakhenge
+  // userId -> "role1, role2"
   const [rolesMap, setRolesMap] = useState({});
 
   const navigate = useNavigate();
@@ -32,31 +36,22 @@ const ManageAdmin = () => {
       try {
         setLoading(true);
 
-        // 1) users
         const usersRes = await api.get("/users");
         const users = Array.isArray(usersRes.data) ? usersRes.data : [];
         setAdmins(users);
 
-        // 2) user_roles + roles join se saare mapping
-        //    controller: getUserRoles => /user-roles
         const rolesRes = await api.get("/user-roles");
         const mappings = Array.isArray(rolesRes.data) ? rolesRes.data : [];
 
-        // 3) user_id ke hisaab se role_name list banaenge
         const map = {};
         mappings.forEach((row) => {
           const uid = row.user_id;
           const rname = row.role_name;
-
           if (!uid || !rname) return;
-
           if (!map[uid]) map[uid] = [];
-          if (!map[uid].includes(rname)) {
-            map[uid].push(rname);
-          }
+          if (!map[uid].includes(rname)) map[uid].push(rname);
         });
 
-        // convert arrays -> "role1, role2"
         Object.keys(map).forEach((uid) => {
           map[uid] = map[uid].join(", ");
         });
@@ -80,8 +75,6 @@ const ManageAdmin = () => {
     try {
       await api.delete(`/users/${id}`);
       setAdmins((prev) => prev.filter((u) => u.id !== id));
-
-      // rolesMap se bhi clean kar dete hain
       setRolesMap((prev) => {
         const copy = { ...prev };
         delete copy[id];
@@ -96,6 +89,10 @@ const ManageAdmin = () => {
     navigate("/admin/edit-client", { state: { admin } });
   };
 
+  const handleView = (admin) => {
+    navigate("/admin/view-client", { state: { admin } });
+  };
+
   /* ===================== FILTER BY TABS ===================== */
   const filteredAdmins = admins.filter((admin) => {
     if (activeTab === "All") return true;
@@ -108,7 +105,6 @@ const ManageAdmin = () => {
   /* ===================== PAGINATION ===================== */
   const totalPages = Math.max(1, Math.ceil(filteredAdmins.length / PAGE_SIZE));
   const startIndex = (currentPage - 1) * PAGE_SIZE;
-
   const paginatedAdmins = filteredAdmins.slice(
     startIndex,
     startIndex + PAGE_SIZE
@@ -153,7 +149,7 @@ const ManageAdmin = () => {
         />
 
         {/* TABS */}
-        <div className="admin-panel-header-tabs">
+        <div className="admin-panel-header-tabs" style={{ marginTop: 12 }}>
           {["All", "Active", "Blocked"].map((tab) => (
             <button
               key={tab}
@@ -170,12 +166,41 @@ const ManageAdmin = () => {
           ))}
         </div>
 
-        {/* TABLE */}
-        <div className="dashboard-table-container">
+        {/* TABLE / CARD container */}
+        <div className="dashboard-table-container" style={{ marginTop: 18 }}>
           {loading ? (
             <p>Loading users...</p>
           ) : (
             <>
+              {/* CARD-LIST (visible on tablet/mobile via CSS) */}
+              <div className="card-list" aria-hidden={false}>
+                {paginatedAdmins.length === 0 ? (
+                  <div style={{ textAlign: "center", padding: 16 }}>
+                    No admins found
+                  </div>
+                ) : (
+                  paginatedAdmins.map((user) => {
+                    const avatar = user.img ? `/uploads/${user.img}` : null;
+
+                    // show first name only
+                    const firstName =
+                      (user.name && user.name.split(" ").filter(Boolean)[0]) || "-";
+
+                    return (
+                      <CommonCard
+                        key={user.id}
+                        avatar={avatar}
+                        title={firstName}
+                        meta={user.number || "-"}
+                        onClick={() => handleEdit(user)} // tap to edit/view per your flow
+                        compact={true}
+                      />
+                    );
+                  })
+                )}
+              </div>
+
+              {/* TABLE (visible on desktop via CSS) */}
               <table>
                 <thead>
                   <tr>
@@ -205,10 +230,7 @@ const ManageAdmin = () => {
                         </td>
                         <td>{user.email || "-"}</td>
                         <td>{user.number || "-"}</td>
-
-                        {/* ✅ roles from /user-roles map */}
                         <td>{rolesMap[user.id] || "-"}</td>
-
                         <td>
                           <span className={getStatusClass(user.status)}>
                             {getStatusLabel(user.status)}
@@ -216,10 +238,23 @@ const ManageAdmin = () => {
                         </td>
                         <td>{formatDate(user.created_at)}</td>
 
+                        {/* DESKTOP ACTIONS - keep edit/view/delete icons */}
                         <td className="actions">
-                          <IoPencil onClick={() => handleEdit(user)} />
-                          <IoIosEye />
-                          <MdDeleteForever onClick={() => handleDelete(user.id)} />
+                          <IoPencil
+                            title="Edit"
+                            style={{ cursor: "pointer", marginRight: 10 }}
+                            onClick={() => handleEdit(user)}
+                          />
+                          <IoIosEye
+                            title="View"
+                            style={{ cursor: "pointer", marginRight: 10 }}
+                            onClick={() => handleView(user)}
+                          />
+                          <MdDeleteForever
+                            title="Delete"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => handleDelete(user.id)}
+                          />
                         </td>
                       </tr>
                     ))
@@ -239,6 +274,9 @@ const ManageAdmin = () => {
                   <li
                     className="arrow"
                     onClick={() => changePage(currentPage - 1)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label="prev-page"
                   >
                     <HiOutlineArrowLeft />
                   </li>
@@ -248,6 +286,9 @@ const ManageAdmin = () => {
                       key={i}
                       className={currentPage === i + 1 ? "active" : ""}
                       onClick={() => changePage(i + 1)}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`page-${i + 1}`}
                     >
                       {String(i + 1).padStart(2, "0")}
                     </li>
@@ -256,6 +297,9 @@ const ManageAdmin = () => {
                   <li
                     className="arrow"
                     onClick={() => changePage(currentPage + 1)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label="next-page"
                   >
                     <HiOutlineArrowRight />
                   </li>
