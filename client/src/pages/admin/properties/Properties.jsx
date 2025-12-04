@@ -1,10 +1,15 @@
+// src/pages/admin/properties/Properties.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoIosEye } from "react-icons/io";
 import { HiOutlineArrowLeft, HiOutlineArrowRight } from "react-icons/hi";
 import { MdDeleteForever } from "react-icons/md";
 import { IoPencil } from "react-icons/io5";
+
 import "../../../assets/css/admin/product.css";
+// reuse/manage admin responsive card styles (needed for card-list)
+import "../../../assets/css/admin/pages/manageAdmin.css";
+
 import Sidebar from "../layout/Sidebar";
 import Navbar from "../layout/Navbar";
 import Breadcrumb from "../layout/Breadcrumb";
@@ -12,19 +17,22 @@ import api from "../../../api/axiosInstance";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-const PAGE_SIZE = 6 // ✅ same idea as ManageAdmin
+import CommonCard from "../common/CommonCard";
+
+const PAGE_SIZE = 6; // same as before
 
 const Properties = () => {
   const [activeTab, setActiveTab] = useState("All Properties");
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // keep JS detection for when to render table vs cards
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isTablet, setIsTablet] = useState(
     window.innerWidth >= 768 && window.innerWidth < 1024
   );
 
-  // ✅ pagination state
+  // pagination
   const [currentPage, setCurrentPage] = useState(1);
 
   const navigate = useNavigate();
@@ -47,7 +55,7 @@ const Properties = () => {
     fetchProperties();
   }, []);
 
-  // responsive
+  // responsive handler
   useEffect(() => {
     const onResize = () => {
       const width = window.innerWidth;
@@ -86,7 +94,7 @@ const Properties = () => {
     navigate(`/admin/properties/edit/${property.id}`);
   };
 
-  // ✅ filter same as before
+  // filters
   const filtered = properties.filter((p) =>
     activeTab === "All Properties"
       ? true
@@ -99,10 +107,9 @@ const Properties = () => {
       : true
   );
 
-  // ✅ PAGINATION (same pattern as ManageAdmin)
+  // pagination
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const startIndex = (currentPage - 1) * PAGE_SIZE;
-
   const paginated = filtered.slice(startIndex, startIndex + PAGE_SIZE);
 
   const changePage = (p) => {
@@ -120,18 +127,19 @@ const Properties = () => {
           button={{ link: "/admin/addproperty", text: "Add Property" }}
         />
 
-        <div className="admin-panel-header-tabs">
+        <div className="admin-panel-header-tabs" style={{ marginTop: 12 }}>
           <button
             className={`admin-panel-header-tab ${
               activeTab === "All Properties" ? "active" : ""
             }`}
             onClick={() => {
               setActiveTab("All Properties");
-              setCurrentPage(1); // ✅ reset page on tab change
+              setCurrentPage(1);
             }}
           >
             All
           </button>
+
           <button
             className={`admin-panel-header-tab ${
               activeTab === "Available" ? "active" : ""
@@ -143,6 +151,7 @@ const Properties = () => {
           >
             Available
           </button>
+
           <button
             className={`admin-panel-header-tab ${
               activeTab === "Reserved" ? "active" : ""
@@ -154,6 +163,7 @@ const Properties = () => {
           >
             Reserved
           </button>
+
           <button
             className={`admin-panel-header-tab ${
               activeTab === "Sold" ? "active" : ""
@@ -167,8 +177,8 @@ const Properties = () => {
           </button>
         </div>
 
-        <div className="dashboard-table-container">
-          {/* Desktop / Large */}
+        <div className="dashboard-table-container" style={{ marginTop: 18 }}>
+          {/* Desktop / Large: show table */}
           {!isMobile && !isTablet && (
             <table>
               <thead>
@@ -181,13 +191,11 @@ const Properties = () => {
                   <th style={{ width: "12%" }}>Action</th>
                 </tr>
               </thead>
+
               <tbody>
                 {loading ? (
                   <tr>
-                    <td
-                      colSpan={7}
-                      style={{ textAlign: "center", padding: 40 }}
-                    >
+                    <td colSpan={7} style={{ textAlign: "center", padding: 40 }}>
                       Loading...
                     </td>
                   </tr>
@@ -200,9 +208,7 @@ const Properties = () => {
                     >
                       <td className="product-info">
                         <img
-                          src={`/uploads/${
-                            p.image || "defaultpropertyimage.png"
-                          }`}
+                          src={`/uploads/${p.image || "defaultpropertyimage.png"}`}
                           alt={p.title}
                           style={{
                             width: 72,
@@ -214,7 +220,9 @@ const Properties = () => {
                         />
                         <span>{p.title}</span>
                       </td>
+
                       <td>{p.address}</td>
+
                       <td
                         style={{
                           fontWeight: 600,
@@ -223,6 +231,7 @@ const Properties = () => {
                       >
                         ₹{p.price}
                       </td>
+
                       <td>
                         <span
                           className={`status ${
@@ -236,27 +245,30 @@ const Properties = () => {
                           {p.status}
                         </span>
                       </td>
+
                       <td>
-                        {p.createdAt
-                          ? new Date(p.createdAt).toLocaleDateString()
-                          : "-"}
+                        {p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "-"}
                       </td>
+
+                      {/* DESKTOP ACTIONS - keep icons */}
                       <td className="actions">
                         <IoPencil
                           onClick={(e) => onEdit(e, p)}
-                          style={{ cursor: "pointer" }}
+                          style={{ cursor: "pointer", marginRight: 10 }}
                           title="Edit"
                         />
                         <IoIosEye
-                          onClick={() => openDetails(p)}
-                          style={{ cursor: "pointer", marginLeft: 8 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDetails(p);
+                          }}
+                          style={{ cursor: "pointer", marginRight: 10 }}
                           title="View"
                         />
                         <MdDeleteForever
                           onClick={(e) => handleDeleteClick(e, p)}
                           style={{
                             cursor: "pointer",
-                            marginLeft: 8,
                             color: "var(--red-color)",
                           }}
                           title="Delete"
@@ -268,11 +280,7 @@ const Properties = () => {
                   <tr>
                     <td
                       colSpan={7}
-                      style={{
-                        textAlign: "center",
-                        padding: 40,
-                        opacity: 0.6,
-                      }}
+                      style={{ textAlign: "center", padding: 40, opacity: 0.6 }}
                     >
                       No properties found
                     </td>
@@ -282,62 +290,40 @@ const Properties = () => {
             </table>
           )}
 
-          {/* Mobile / Tablet cards */}
+          {/* Tablet / Mobile: card-list (uses CommonCard) */}
           {(isMobile || isTablet) && (
-            <div className="cardlist" style={{ padding: 12 }}>
+            <div className="card-list" style={{ padding: 12 }}>
               {paginated.length > 0 ? (
-                paginated.map((p) => (
-                  <article
-                    key={p.id}
-                    className="card-row"
-                    onClick={() => openDetails(p)}
-                  >
-                    <div className="card-left">
-                      <img
-                        src={`/uploads/${
-                          p.image || "defaultpropertyimage.png"
-                        }`}
-                        alt={p.title}
-                      />
-                    </div>
-                    <div className="card-middle">
-                      <div className="card-title">{p.title}</div>
-                      <div className="card-sub">{p.address}</div>
-                    </div>
-                    <div className="card-right">
-                      <div
-                        className={`count-pill ${
-                          p.status === "available"
-                            ? "published"
-                            : p.status === "reserved"
-                            ? "low-stock"
-                            : "out-of-stock"
-                        }`}
-                      >
-                        ₹{p.price}
-                      </div>
-                    </div>
-                  </article>
-                ))
+                paginated.map((p) => {
+                  const avatar = p.image ? `/uploads/${p.image}` : null;
+                  // Title top, address as subtitle, price as meta
+                  return (
+                    <CommonCard
+                      key={p.id}
+                      avatar={avatar}
+                      title={p.title}
+                      subtitle={p.address}
+                      meta={`₹${p.price}`}
+                      onClick={() => openDetails(p)}
+                      compact={true}
+                    />
+                  );
+                })
               ) : (
-                <div className="empty-state">No properties found</div>
+                <div style={{ textAlign: "center", padding: 16 }}>No properties found</div>
               )}
             </div>
           )}
 
-          {/* ✅ footer pagination (now functional) */}
-          <div className="table-footer-pagination">
+          {/* Footer pagination */}
+          <div className="table-footer-pagination" style={{ marginTop: 12 }}>
             <span>
-              Showing{" "}
-              {filtered.length === 0 ? 0 : startIndex + 1}-
-              {Math.min(startIndex + PAGE_SIZE, filtered.length)} from{" "}
-              {filtered.length}
+              Showing {filtered.length === 0 ? 0 : startIndex + 1}-
+              {Math.min(startIndex + PAGE_SIZE, filtered.length)} from {filtered.length}
             </span>
+
             <ul className="pagination">
-              <li
-                className="arrow"
-                onClick={() => changePage(currentPage - 1)}
-              >
+              <li className="arrow" onClick={() => changePage(currentPage - 1)}>
                 <HiOutlineArrowLeft />
               </li>
 
@@ -351,22 +337,14 @@ const Properties = () => {
                 </li>
               ))}
 
-              <li
-                className="arrow"
-                onClick={() => changePage(currentPage + 1)}
-              >
+              <li className="arrow" onClick={() => changePage(currentPage + 1)}>
                 <HiOutlineArrowRight />
               </li>
             </ul>
           </div>
         </div>
 
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar
-          theme="colored"
-        />
+        <ToastContainer position="top-right" autoClose={3000} hideProgressBar theme="colored" />
       </main>
     </>
   );
