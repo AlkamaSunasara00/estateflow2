@@ -11,16 +11,11 @@ const jwt = require("jsonwebtoken");
 const login = (req, res) => {
   const { email, password } = req.body;
 
-  // grab IP + Agent
   const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
   const agent = req.headers["user-agent"];
 
   connection.query(
-    `
-    SELECT * 
-    FROM users 
-    WHERE email = ? 
-      AND status='active'`,
+   ` SELECT * FROM users WHERE email = ?`,
     [email],
     (err, rows) => {
       if (err) return res.status(500).json({ error: "DB error" });
@@ -28,6 +23,12 @@ const login = (req, res) => {
         return res.status(404).json({ error: "User not found" });
 
       const user = rows[0];
+
+      if (user.status === "block")
+        return res.status(403).json({ error: "Your account is blocked" });
+
+      if (user.status === "trash")
+        return res.status(403).json({ error: "your account is in trash" });
 
       if (!bcrypt.compareSync(password, user.password))
         return res.status(400).json({ error: "Wrong password" });
@@ -37,24 +38,23 @@ const login = (req, res) => {
         FROM users_roles ur
         JOIN roles r ON ur.role_id = r.id
         WHERE ur.user_id = ?
-    `;
+      `;
 
       connection.query(roleSQL, [user.id], (roleErr, rRows) => {
         if (roleErr)
           return res.status(500).json({ error: "Role fetch error" });
 
         const roles = rRows.map((r) => r.name);
-
         const userPayload = { id: user.id, email: user.email, roles };
 
         const accessToken = generateAccessToken(userPayload);
         const refreshToken = generateRefreshToken(userPayload);
 
         const insertSQL = `
-          INSERT INTO active_tokens
-    (access_token, refresh_token, user_id, ip_address, user_agent, last_activity, is_blacklisted, access_expires_at, refresh_expires_at)
-          VALUES(?, ?, ?, ?, ?, NOW(), 0, DATE_ADD(NOW(), INTERVAL 15 MINUTE), DATE_ADD(NOW(), INTERVAL 7 DAY))
-      `;
+          INSERT INTO active_tokens 
+          (access_token, refresh_token, user_id, ip_address, user_agent, last_activity, is_blacklisted, access_expires_at, refresh_expires_at)
+          VALUES (?, ?, ?, ?, ?, NOW(), 0, DATE_ADD(NOW(), INTERVAL 15 MINUTE), DATE_ADD(NOW(), INTERVAL 7 DAY))
+        `;
 
         connection.query(
           insertSQL,
@@ -184,4 +184,3 @@ const me = (req, res) => {
 
 
 module.exports = { login, refreshAccessToken, logout, me };
-    
