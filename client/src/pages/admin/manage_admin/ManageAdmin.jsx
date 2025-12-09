@@ -212,7 +212,7 @@ const ManageAdmin = () => {
                         avatar={avatar}
                         title={firstName}
                         meta={user.number || "No phone"}
-                        onClick={() => handleEdit(user)}
+                        onClick={() => handleView(user)}
                         compact
                       />
                     );
