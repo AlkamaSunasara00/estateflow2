@@ -164,10 +164,6 @@ const TrashClients = () => {
                         className="common-card common-card--compact"
                         role="button"
                         tabIndex={0}
-                        onClick={() => handleEdit(user)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") handleEdit(user);
-                        }}
                         aria-label={`Edit ${user.name || "user"}`}
                         style={{ marginBottom: 12 }}
                       >
@@ -232,7 +228,6 @@ const TrashClients = () => {
                 )}
               </div>
 
-              {/* ---------- Desktop table ---------- */}
               <table>
                 <thead>
                   <tr>
