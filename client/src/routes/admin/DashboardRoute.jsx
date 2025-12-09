@@ -21,6 +21,7 @@ import AddProperty from "../../pages/admin/properties/AddProperties";
 import EditProperty from "../../pages/admin/properties/UpdateProperties";
 import LogoutPage from "../../pages/admin/login/Logout";
 import UserDashboard from "../../pages/admin/manage_admin/UserDashboard";
+import SalesCard from "../../pages/admin/cards/Sales";
 
 const DashboardRoute = () => {
   return (
@@ -29,7 +30,7 @@ const DashboardRoute = () => {
       <Route path="/admin/login" element={<Login />} />
 
 
-      <Route element={<ProtectedRoute />}>
+      {/* <Route element={<ProtectedRoute />}> */}
         <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
         <Route path="/admin/dashboard" element={<Dashboard />} />
         <Route path="/admin/product" element={<Product />} />
@@ -47,8 +48,10 @@ const DashboardRoute = () => {
         <Route path="/admin/add-new_client" element={<AddNewAdmin />} />
         <Route path="/admin/edit-client" element={<EditAdmin />} />
         <Route path="/admin/user-dashboard" element={<UserDashboard />} />
+        <Route path="/admin/salescard" element={<SalesCard />} />
+
         <Route path="/logout" element={<LogoutPage />} />
-      </Route>
+      {/* </Route> */}
     </Routes>
   );
 };

@@ -60,7 +60,6 @@ const ManageAdmin = () => {
     loadData();
   }, []);
 
-  /* actions (moveToTrash, restore, delete) - keep as before */
   const moveToTrash = async (id) => {
     try {
       await api.put(`/trash-user/${id}`, { status: "trash" });
@@ -90,7 +89,7 @@ const ManageAdmin = () => {
   };
 
   const handleEdit = (admin) => navigate("/admin/edit-client", { state: { admin } });
-  const handleView = (admin) => navigate("/admin/view-client", { state: { admin } });
+  const handleView = (admin) => navigate("/admin/user-dashboard", { state: { admin } });
 
   /* filter + search */
   const filteredAdmins = admins.filter((admin) => {
@@ -194,7 +193,7 @@ const ManageAdmin = () => {
                         avatar={avatar}
                         title={firstName}
                         meta={user.number || "-"}
-                        onClick={() => handleEdit(user)}
+                        onClick={() => handleView(user)}
                         compact
                       />
                     );
@@ -244,10 +243,8 @@ const ManageAdmin = () => {
                           {activeTab === "All" ? (
                             <>
                               <IoPencil onClick={() => handleEdit(user)} />
-                              <NavLink to={"/admin/user-dashboard"}>
 
-                                <IoIosEye  />
-                              </NavLink>
+                              <IoIosEye onClick={() => handleView(user)} />
                               <MdDeleteForever onClick={() => moveToTrash(user.id)} />
                             </>
                           ) : (

@@ -1,17 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Sidebar from "../layout/Sidebar";
-import Navbar from "../layout/Navbar";
+import { HiOutlineArrowLeft } from "react-icons/hi";
+import { FiMenu } from "react-icons/fi";
 import { MdSave } from "react-icons/md";
-import { HiXMark } from "react-icons/hi2";
-import { IoMdArrowDropright } from "react-icons/io";
-import { Link, NavLink, useNavigate } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
 import api from "../../../api/axiosInstance";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "../../../assets/css/admin/common/form.css";
 
 const AddNewAdmin = () => {
   const navigate = useNavigate();
+  const fileRef = useRef(null);
 
-  // exactly same as DB / backend
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [number, setNumber] = useState("");
@@ -19,12 +20,12 @@ const AddNewAdmin = () => {
   const [status, setStatus] = useState("active");
   const [password, setPassword] = useState("");
   const [profileFile, setProfileFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(""); // Live preview
 
   const [roles, setRoles] = useState([]);
   const [selectedRoleIds, setSelectedRoleIds] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
-  // 🔒 allowed file types (frontend check)
   const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
 
   const handleProfileChange = (e) => {
@@ -32,37 +33,22 @@ const AddNewAdmin = () => {
     if (!file) return;
 
     if (!allowedTypes.includes(file.type)) {
-      alert("Only JPG, PNG, and WEBP images are allowed.");
+      toast.error("Only JPG, PNG, and WEBP images are allowed.");
       e.target.value = "";
       return;
     }
 
+    // Revoke old preview
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+
     setProfileFile(file);
+    setPreviewUrl(URL.createObjectURL(file));
   };
 
-  // fetch roles (simple, now via api instance)
-  useEffect(() => {
-    const fetchRoles = async () => {
-      try {
-        const res = await api.get("/roles");
-        const allRoles = Array.isArray(res.data) ? res.data : [];
-
-        // "admin" role UI se hide rakhenge
-        const visibleRoles = allRoles.filter(
-          (r) => r.name?.toLowerCase() !== "admin"
-        );
-
-        setRoles(visibleRoles);
-      } catch (err) {
-        console.error("Failed to fetch roles:", err);
-      }
-    };
-
-    fetchRoles();
-  }, []);
-
   const handleButtonClick = () => {
-    document.getElementById("imageInputFile").click();
+    fileRef.current?.click();
   };
 
   const handleRoleToggle = (roleId) => {
@@ -73,35 +59,42 @@ const AddNewAdmin = () => {
     );
   };
 
+  const handleHamburgerClick = () => {
+    if (window.toggleAdminSidebar) window.toggleAdminSidebar();
+  };
+
+  // Cleanup preview on unmount
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await api.get("/roles");
+        const allRoles = Array.isArray(res.data) ? res.data : [];
+        const visibleRoles = allRoles.filter((r) => r.name?.toLowerCase() !== "admin");
+        setRoles(visibleRoles);
+      } catch (err) {
+        console.error("Failed to fetch roles:", err);
+      }
+    };
+    fetchRoles();
+  }, []);
+
   const handleSubmit = async (e) => {
-    if (e) e.preventDefault();
+    e?.preventDefault();
     if (submitting) return;
 
-    if (!name) {
-      alert("Please enter name");
-      return;
-    }
-    if (!email) {
-      alert("Please enter email");
-      return;
-    }
-    if (!number) {
-      alert("Please enter phone number");
-      return;
-    }
-    if (!password) {
-      alert("Please enter password");
-      return;
-    }
-    if (selectedRoleIds.length === 0) {
-      alert("Please select at least one role");
+    if (!name || !email || !number || !password || selectedRoleIds.length === 0) {
+      toast.warn("Please fill all required fields");
       return;
     }
 
+    setSubmitting(true);
     try {
-      setSubmitting(true);
-
-      // 1) create user – exactly same fields as backend
       const formData = new FormData();
       formData.append("name", name);
       formData.append("email", email);
@@ -114,21 +107,18 @@ const AddNewAdmin = () => {
       const userRes = await api.post("/users", formData);
       const userId = userRes.data?.insertId;
 
-      // 2) assign roles
-      if (userId) {
+      if (userId && selectedRoleIds.length > 0) {
         await Promise.all(
           selectedRoleIds.map((roleId) =>
-            api.post("/user-roles", {
-              user_id: userId,
-              role_id: roleId,
-            })
+            api.post("/user-roles", { user_id: userId, role_id: roleId })
           )
         );
       }
 
+      toast.success("Client added successfully");
       navigate("/admin/manage-clients");
     } catch (err) {
-      console.error("Failed to save client:", err);
+      toast.error("Failed to add client");
     } finally {
       setSubmitting(false);
     }
@@ -137,194 +127,146 @@ const AddNewAdmin = () => {
   return (
     <>
       <Sidebar />
-      <Navbar />
-      <main className="admin-panel-header-div">
-        <div
-          className="admin-dashboard-main-header"
-          style={{ marginBottom: "24px" }}
-        >
-          <div>
-            <h5>Add Client</h5>
-            <div className="admin-panel-breadcrumb">
-              <Link to="/admin/dashboard" className="breadcrumb-link active">
-                Dashboard
-              </Link>
-              <IoMdArrowDropright />
-              <Link to="/admin/manage-clients" className="breadcrumb-link active">
-                Clients List
-              </Link>
-              <IoMdArrowDropright />
-              <span className="breadcrumb-text">Add Client</span>
-            </div>
-          </div>
-          <div className="admin-panel-header-add-buttons">
-            <NavLink
-              to="/admin/manage-clients"
-              className="cancel-btn dashboard-add-product-btn"
-            >
-              <HiXMark /> Cancel
-            </NavLink>
-            <button
-              className="primary-btn dashboard-add-product-btn"
-              onClick={handleSubmit}
-              disabled={submitting}
-            >
-              <MdSave /> {submitting ? "Saving..." : "Save client"}
-            </button>
-          </div>
+
+      <main className="admin-panel-header-div no-navbar">
+        <div className="add-form-header">
+          <Link to="/admin/manage-clients" className="back-arrow-btn">
+            <HiOutlineArrowLeft />
+          </Link>
+          <h5>Add Client</h5>
+          <button className="form-hamburger-btn" onClick={handleHamburgerClick} aria-label="Toggle sidebar">
+            <FiMenu />
+          </button>
         </div>
 
-        <div className="dashboard-add-content-card-div">
-          {/* LEFT SIDE */}
-          <div className="dashboard-add-content-left-side">
-            <div className="dashboard-add-content-card">
-              <h6>General Information</h6>
-              <div className="add-product-form-container">
-                <div className="coupon-code-input-profile">
-                  <div>
-                    <label htmlFor="name">Name</label>
-                    <input
-                      type="text"
-                      id="name"
-                      placeholder="Type full name here..."
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="email">Email</label>
-                    <input
-                      type="text"
-                      id="email"
-                      placeholder="Type your email here..."
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </div>
+        <div className="form-content-after-header">
+          <form onSubmit={handleSubmit} className="form-layout">
+            {/* Left Column */}
+            <div>
+              <div className="form-card">
+                <h6>General Information</h6>
+                <div className="form-group">
+                  <label>Name *</label>
+                  <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter full name" />
                 </div>
-
-                <div className="coupon-code-input-profile">
-                  <div>
-                    <label htmlFor="phone-number">Phone Number</label>
-                    <input
-                      type="text"
-                      id="phone-number"
-                      placeholder="Type your phone number here..."
-                      value={number}
-                      onChange={(e) => setNumber(e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="alt-phone-number">Alt Phone Number</label>
-                    <input
-                      type="text"
-                      id="alt-phone-number"
-                      placeholder="Type your alternate phone number here..."
-                      value={altNumber}
-                      onChange={(e) => setAltNumber(e.target.value)}
-                    />
-                  </div>
+                <div className="form-group">
+                  <label>Email *</label>
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Enter email address" />
                 </div>
-
-                <div className="coupon-code-input-profile">
-                  <div>
-                    <label htmlFor="password">Password</label>
-                    <input
-                      type="password"
-                      id="password"
-                      placeholder="Type password here..."
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                  </div>
+                <div className="form-group">
+                  <label>Phone Number *</label>
+                  <input type="text" value={number} onChange={(e) => setNumber(e.target.value)} placeholder="Enter phone number" />
+                </div>
+                <div className="form-group">
+                  <label>Alternate Number</label>
+                  <input type="text" value={altNumber} onChange={(e) => setAltNumber(e.target.value)} placeholder="Enter alternate number" />
+                </div>
+                <div className="form-group">
+                  <label>Password *</label>
+                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter password" />
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* RIGHT SIDE */}
-          <div className="dashboard-add-content-right-side">
-            {/* Profile */}
-            <div className="dashboard-add-content-card">
-              <h6>Profile</h6>
-              <div className="add-product-form-container">
-                <label htmlFor="photo">Photo</label>
-                <div className="add-product-upload-container">
-                  <div className="add-product-upload-icon">
-                    <img
-                      src="https://cdn-icons-png.flaticon.com/512/1829/1829586.png"
-                      alt="Upload Icon"
-                    />
-                  </div>
-                  <p className="add-product-upload-text">
-                    Drag and drop image here, or click add image
-                  </p>
-                  <button
-                    type="button"
-                    className="add-product-upload-btn secondary-btn"
-                    onClick={handleButtonClick}
-                  >
-                    Add Image
-                  </button>
+              {/* Profile Photo with Preview */}
+              <div className="form-card">
+                <h6>Profile Photo</h6>
+                <div className="upload-box" onClick={handleButtonClick}>
+                  {previewUrl ? (
+                    <div className="image-preview-container">
+                      <img
+                        src={previewUrl}
+                        alt="Profile preview"
+                        style={{
+                          width: "100%",
+                          maxWidth: 240,
+                          height: 240,
+                          objectFit: "cover",
+                          borderRadius: 16,
+                          boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                        }}
+                        className="image-preview-img profile-preview-img"
+                      />
+                      <p style={{ marginTop: 14, fontSize: 13, color: "#555" }} className="image-preview-text">Image selected – Click to change</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="upload-icon">
+                        <img
+                          src="https://cdn-icons-png.flaticon.com/512/1829/1829586.png"
+                          alt="upload"
+                        />
+                      </div>
+                      <p className="upload-text">Click to upload photo</p>
+                    </>
+                  )}
                   <input
-                    type="file"
+                    ref={fileRef}
                     id="imageInputFile"
-                    name="img"
-                    style={{ display: "none" }}
-                    accept=".jpg,.jpeg,.png,.webp"
+                    type="file"
+                    accept="image/*"
                     onChange={handleProfileChange}
+                    style={{ display: "none" }}
                   />
                 </div>
               </div>
             </div>
 
-            {/* Status */}
-            <div className="dashboard-add-content-card">
-              <h6>Status</h6>
-              <div className="add-product-form-container">
-                <label htmlFor="admin-status">Client Status</label>
-                <select
-                  id="admin-status"
-                  name="status"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                >
-                  <option value="active">Active</option>
-                  <option value="block">Blocked</option>
-                </select>
+            {/* Right Column */}
+            <div>
+              <div className="form-card">
+                <h6>Status</h6>
+                <div className="form-group">
+                  <label>Client Status</label>
+                  <select value={status} onChange={(e) => setStatus(e.target.value)}>
+                    <option value="active">Active</option>
+                    <option value="block">Blocked</option>
+                  </select>
+                </div>
               </div>
-            </div>
 
-            {/* Roles */}
-            <div className="dashboard-add-content-card">
-              <h6>Roles</h6>
-              <div className="add-product-form-container">
-                {roles.length === 0 ? (
-                  <p style={{ fontSize: "14px" }}>No roles available</p>
-                ) : (
-                  <div className="roles-checkbox-group">
-                    {roles.map((role) => (
-                      <label
-                        key={role.id}
-                        className="role-checkbox-item"
-                        style={{ display: "block", marginBottom: "6px" }}
-                      >
-                        <input
-                          type="checkbox"
-                          value={role.id}
-                          checked={selectedRoleIds.includes(role.id)}
-                          onChange={() => handleRoleToggle(role.id)}
-                        />{" "}
-                        {role.name}
-                      </label>
-                    ))}
-                  </div>
-                )}
+              <div className="form-card">
+                <h6>Roles</h6>
+                <div className="form-group">
+                  {roles.length === 0 ? (
+                    <p style={{ color: "#888", fontSize: "14px" }}>No roles available</p>
+                  ) : (
+                    <div className="roles-selection">
+                      {roles.map((role) => (
+                        <label key={role.id} className="role-chip">
+                          <input
+                            type="checkbox"
+                            checked={selectedRoleIds.includes(role.id)}
+                            onChange={() => handleRoleToggle(role.id)}
+                          />
+                          <div className="checkmark"></div>
+                          <span>{role.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Desktop Save Button */}
+              <div className="desktop-save-wrapper">
+                <button className="desktop-save-btn" onClick={handleSubmit} disabled={submitting}>
+                  <MdSave />
+                  {submitting ? "Saving..." : "Save Client"}
+                </button>
               </div>
             </div>
-          </div>
+          </form>
+        </div>
+
+        {/* Mobile Sticky Button */}
+        <div className="sticky-bottom-save">
+          <button onClick={handleSubmit} disabled={submitting}>
+            {submitting ? "Saving..." : "Save Client"}
+          </button>
         </div>
       </main>
+
+      <ToastContainer position="top-right" autoClose={2500} theme="colored" />
     </>
   );
 };

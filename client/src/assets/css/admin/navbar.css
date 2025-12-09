@@ -49,17 +49,16 @@
   height: 44px;
   border-radius: 10px;
   border: 2px solid var(--primary-border-color);
-  background: var(--white-color);
+  background: var(--primary-btn-bg);
   cursor: pointer;
   font-size: 22px;
-  color: var(--primary-btn-bg);
+  color: var(--white-color);
   transition: all 0.2s ease;
 }
 
 .dashboard-navbar-hamburger:hover {
-  background: var(--primary-btn-bg);
-  color: #fff;
-  border-color: var(--primary-btn-bg);
+  background: var(--white-color);
+  color: var(--primary-btn-bg);
   transform: scale(1.03);
 }
 

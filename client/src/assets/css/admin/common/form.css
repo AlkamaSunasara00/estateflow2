@@ -1,0 +1,349 @@
+/* ============================================= */
+/* FORM.CSS – FINAL VERSION                        */
+/* Uses ONLY variables from main.css – No duplicates */
+/* Mobile-first, Responsive, Clean & Modern         */
+/* ============================================= */
+
+:root {
+  --radius: 12px;
+  --shadow: 0 6px 20px rgba(0,0,0,0.06);
+}
+
+/* === NO TOP GAP WHEN NO NAVBAR === */
+.admin-panel-header-div.no-navbar {
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100vh !important;
+  min-height: 100vh;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: white;
+  overflow-y: auto;
+}
+
+@media (min-width: 1025px) {
+  .admin-panel-header-div.no-navbar {
+    width: calc(100% - 250px) !important;
+    left: 250px !important;
+  }
+}
+
+/* === HEADER: Back Arrow + Title + Hamburger (mobile) === */
+.add-form-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14.5px 16px;
+  border-bottom: 1px solid var(--primary-border-color);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  margin: 0;
+}
+
+.add-form-header .back-arrow-btn {
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--primary-border-color);
+  border-radius: 10px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-form-header .back-arrow-btn:hover {
+  background: var(--dashboard-tr-hover-color);
+}
+
+.add-form-header h5 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--black-color);
+  margin: 0;
+  flex: 1;
+}
+
+/* === HAMBURGER ICON – Mobile Only === */
+.form-hamburger-btn {
+  display: none;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  border: 2px solid var(--primary-border-color);
+  border-radius: 10px;
+  color: var(--white-color);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  background-color: var(--primary-btn-bg);
+}
+
+.form-hamburger-btn:hover {
+  background: var(--primary-border-color);
+  color: var(--primary-btn-bg);
+  transform: scale(1.03);
+}
+
+.form-hamburger-btn:active {
+  transform: scale(0.96);
+}
+
+@media (max-width: 1024px) {
+  .form-hamburger-btn {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  .form-hamburger-btn {
+    display: none !important;
+  }
+}
+
+/* === FORM CONTENT === */
+.form-content-after-header {
+  padding: 16px 16px 120px;
+}
+
+@media (min-width: 768px) {
+  .form-content-after-header {
+    padding: 16px 16px 80px;
+  }
+}
+
+/* === LAYOUT === */
+.form-layout {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .form-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 20px;
+  }
+}
+
+/* === FORM CARD === */
+.form-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--primary-border-color);
+}
+
+.form-card h6 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--black-color);
+  margin: 0 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--primary-border-color);
+}
+
+/* === INPUTS & SELECT === */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 6px;
+  padding-left: 4px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--primary-border-color);
+  border-radius: 10px;
+  background: var(--light-white-color);
+  font-size: 14px;
+  color: var(--black-color);
+  outline: none;
+  transition: all 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--primary-btn-bg);
+  box-shadow: 0 0 0 3px rgba(56, 88, 214, 0.15);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--primary-font-color);
+}
+
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* === UPLOAD BOX === */
+.upload-box {
+  border: 2px dashed var(--primary-border-color);
+  border-radius: 16px;
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  background: linear-gradient(180deg, white 0%, var(--light-white-color) 100%);
+  transition: all 0.3s ease;
+}
+
+.upload-box:hover {
+  border-color: var(--primary-btn-bg);
+  background: #edf0ff;
+}
+
+.upload-icon img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+
+.upload-text {
+  font-size: 13px;
+  color: var(--primary-font-color);
+  margin: 12px 0 0;
+}
+
+/* === SAVE BUTTONS === */
+.desktop-save-wrapper {
+  padding: 0 0 16px;
+  text-align: right;
+}
+
+.desktop-save-btn,
+.sticky-bottom-save button {
+  background: var(--primary-btn-bg);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 180px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.desktop-save-btn:hover:not(:disabled),
+.sticky-bottom-save button:hover:not(:disabled) {
+  background: #2a47b8;
+  transform: translateY(-1px);
+}
+
+.desktop-save-btn:disabled,
+.sticky-bottom-save button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sticky-bottom-save button {
+  width: 100%;
+  height: 50px;
+  font-size: 16px;
+  border-radius: 12px;
+}
+
+/* === ROLES CHIPS – Beautiful Toggle Chips === */
+.roles-selection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.role-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--dashboard-tr-hover-color);
+  border: 1px solid var(--primary-border-color);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.role-chip input[type="checkbox"] {
+  display: none;
+}
+
+.role-chip .checkmark {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.role-chip input:checked + .checkmark {
+  background: var(--primary-btn-bg);
+  border-color: var(--primary-btn-bg);
+}
+
+.role-chip:hover {
+  background: #edf0ff;
+  border-color: var(--primary-btn-bg);
+}
+
+.role-chip input[type="checkbox"]:checked ~ span {
+  color: var(--primary-btn-bg);
+  font-weight: 600;
+}
+
+/* === MOBILE STICKY BUTTON === */
+.sticky-bottom-save {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background: white;
+  border-top: 1px solid var(--primary-border-color);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+  z-index: 100;
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .desktop-save-wrapper { display: none !important; }
+  .sticky-bottom-save { display: block !important; }
+  .form-content-after-header { padding: 16px 12px 120px; }
+  .add-form-header { padding: 16px 12px; }
+}
+
+@media (min-width: 768px) {
+  .sticky-bottom-save { display: none !important; }
+}

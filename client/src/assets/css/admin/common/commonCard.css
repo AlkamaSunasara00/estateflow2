@@ -46,7 +46,7 @@
 .common-card__avatar {
   width: 56px;
   height: 56px;
-  border-radius: 50%;
+  border-radius: 20%;
   overflow: hidden;
   background: var(--light-white-color);
   flex-shrink: 0;
@@ -105,7 +105,7 @@
 
 /* Meta (grey) - sits at the bottom of the card body */
 .common-card__meta {
-  font-weight: 600;
+  font-weight: 400;
   font-size: 14px;
   color: var(--primary-font-color); /* grey meta */
   margin-top: 6px;
