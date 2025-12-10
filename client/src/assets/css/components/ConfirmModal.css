@@ -1,0 +1,119 @@
+/* ===== Overlay ===== */
+.confirm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 9999;
+}
+
+/* ===== Card ===== */
+.confirm-modal-card {
+  width: 100%;
+  max-width: 420px; /* bigger */
+  background: var(--white-color);
+  border-radius: 14px;
+  padding: 24px 26px 20px; /* more space */
+  box-shadow: 0px 14px 36px rgba(18, 18, 18, 0.16);
+  font-family: var(--secondary-font);
+  animation: confirm-fade-up 0.22s ease-out;
+}
+
+@keyframes confirm-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Title ===== */
+.confirm-modal-title {
+  font-size: 20px; /* bigger */
+  font-weight: 600;
+  color: #191c1f;
+  margin: 0 0 10px 0; /* more gap from text */
+}
+
+/* ===== Text ===== */
+.confirm-modal-text {
+  font-size: 15px; /* slightly bigger */
+  color: var(--primary-font-color);
+  line-height: 1.6;
+  margin: 0 0 20px 0; /* more breathing room */
+}
+
+/* ===== Action buttons ===== */
+.confirm-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+/* shared button base */
+.confirm-modal-actions button {
+  padding: 9px 18px; /* bigger buttons */
+  font-size: 14px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  font-family: var(--primary-font);
+  cursor: pointer;
+  transition: 0.2s ease;
+  min-width: 110px; /* even look */
+}
+
+/* cancel */
+.confirm-cancel-btn {
+  background: var(--white-color);
+  color: var(--primary-font-color);
+  border-color: var(--primary-border-color);
+}
+
+.confirm-cancel-btn:hover {
+  background: var(--light-white-color);
+}
+
+/* confirm (primary) */
+.confirm-ok-btn {
+  background: var(--primary-btn-bg);
+  color: var(--white-color);
+  border-color: var(--primary-btn-bg);
+}
+
+.confirm-ok-btn:hover {
+  background: transparent;
+  color: var(--primary-btn-bg);
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 480px) {
+  .confirm-modal-card {
+    max-width: 100%;
+    padding: 20px 18px 16px;
+  }
+
+  .confirm-modal-title {
+    font-size: 18px;
+  }
+
+  .confirm-modal-text {
+    font-size: 14px;
+  }
+
+  .confirm-modal-actions {
+    justify-content: space-between;
+  }
+
+  .confirm-modal-actions button {
+    min-width: 100px;
+    padding: 9px 14px;
+  }
+}

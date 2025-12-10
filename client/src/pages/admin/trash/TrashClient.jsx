@@ -7,6 +7,9 @@ import Sidebar from "../layout/Sidebar";
 import Navbar from "../layout/Navbar";
 import api from "../../../api/axiosInstance";
 
+// ⬅️ Add this import (update path if needed)
+import DeleteModal from "../../../components/modals/DeleteModal";
+
 const PAGE_SIZE = 5;
 
 const TrashClients = () => {
@@ -82,6 +85,25 @@ const TrashClients = () => {
 
   const formatDate = (d) =>
     d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "-";
+
+  // 🔥 Open modal with selected user
+  const openDeleteModal = (user) => {
+    setSelectedUser(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  // 🔥 Close modal + clear selected
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setSelectedUser(null);
+  };
+
+  // 🔥 Called when user confirms in DeleteModal
+  const handleConfirmDelete = async () => {
+    if (!selectedUser) return;
+    await deleteUserForever(selectedUser.id);
+    closeDeleteModal();
+  };
 
   return (
     <>
@@ -181,6 +203,14 @@ const TrashClients = () => {
           )}
         </div>
       </main>
+
+      {/* 🔥 Delete Modal hooked at root level */}
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleConfirmDelete}
+        propertyName={selectedUser?.name}
+      />
     </>
   );
 };
