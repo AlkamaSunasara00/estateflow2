@@ -1,4 +1,4 @@
-# 🏡 RealEstate – Full-Stack Property Management Platform
+# 🏡 EstateFlow – Full-Stack Property Management Platform
 
 A complete **Real Estate Management System** built with **React (Vite)**, **Node.js (Express)**, **MySQL**, and **Multer**.  
 Includes a powerful admin dashboard for managing **properties, categories, users, images, settings**, and more.
@@ -75,5 +75,6 @@ Pull requests are welcome. Open an issue first to discuss major changes.
 This project is **open-source** and free to use.
 
 ---
+
 
 
