@@ -12,6 +12,9 @@ import api from "../../../api/axiosInstance";
 import "../../../assets/css/admin/pages/mainLayout.css";
 import { useNavigate } from "react-router-dom";
 
+// ⬅️ Add this import (update path if needed)
+import DeleteModal from "../../../components/modals/DeleteModal";
+
 const PAGE_SIZE = 5;
 
 const TrashClients = () => {
@@ -20,8 +23,11 @@ const TrashClients = () => {
   const [loading, setLoading] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-
   const [searchTerm, setSearchTerm] = useState("");
+
+  // 🔥 New states for DeleteModal
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const navigate = useNavigate();
 
@@ -67,8 +73,9 @@ const TrashClients = () => {
     }
   };
 
+  // ❌ Old: had window.confirm
+  // ✅ Now: only does delete logic, confirmation handled by DeleteModal
   const deleteUserForever = async (id) => {
-    if (!window.confirm("Delete permanently?")) return;
     try {
       await api.delete(`/users/${id}`);
       setAdmins((prev) => prev.filter((u) => u.id !== id));
@@ -77,8 +84,10 @@ const TrashClients = () => {
     }
   };
 
-  const handleEdit = (admin) => navigate("/admin/edit-client", { state: { admin } });
-  const handleView = (admin) => navigate("/admin/user-dashboard", { state: { admin } });
+  const handleEdit = (admin) =>
+    navigate("/admin/edit-client", { state: { admin } });
+  const handleView = (admin) =>
+    navigate("/admin/user-dashboard", { state: { admin } });
 
   /* filter + search */
   const filteredAdmins = admins.filter((admin) => {
@@ -95,7 +104,10 @@ const TrashClients = () => {
 
   const totalPages = Math.max(1, Math.ceil(filteredAdmins.length / PAGE_SIZE));
   const startIndex = (currentPage - 1) * PAGE_SIZE;
-  const paginated = filteredAdmins.slice(startIndex, startIndex + PAGE_SIZE);
+  const paginated = filteredAdmins.slice(
+    startIndex,
+    startIndex + PAGE_SIZE
+  );
 
   const changePage = (p) => p >= 1 && p <= totalPages && setCurrentPage(p);
 
@@ -107,6 +119,25 @@ const TrashClients = () => {
           year: "numeric",
         })
       : "-";
+
+  // 🔥 Open modal with selected user
+  const openDeleteModal = (user) => {
+    setSelectedUser(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  // 🔥 Close modal + clear selected
+  const closeDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setSelectedUser(null);
+  };
+
+  // 🔥 Called when user confirms in DeleteModal
+  const handleConfirmDelete = async () => {
+    if (!selectedUser) return;
+    await deleteUserForever(selectedUser.id);
+    closeDeleteModal();
+  };
 
   return (
     <>
@@ -174,7 +205,10 @@ const TrashClients = () => {
                         <div className="common-card__left">
                           <div className="common-card__avatar">
                             {avatar ? (
-                              <img src={avatar} alt={user.name || "profile"} />
+                              <img
+                                src={avatar}
+                                alt={user.name || "profile"}
+                              />
                             ) : (
                               <div className="common-card__avatar--placeholder" />
                             )}
@@ -182,8 +216,12 @@ const TrashClients = () => {
                         </div>
 
                         <div className="common-card__body">
-                          <div className="common-card__title">{firstName}</div>
-                          <div className="common-card__meta">{user.number || "-"}</div>
+                          <div className="common-card__title">
+                            {firstName}
+                          </div>
+                          <div className="common-card__meta">
+                            {user.number || "-"}
+                          </div>
                         </div>
 
                         <div className="common-card__right">
@@ -191,7 +229,9 @@ const TrashClients = () => {
                           <button
                             type="button"
                             title="Restore"
-                            aria-label={`Restore ${user.name || "user"}`}
+                            aria-label={`Restore ${
+                              user.name || "user"
+                            }`}
                             onClick={(e) => {
                               e.stopPropagation();
                               restoreUser(user.id);
@@ -203,17 +243,24 @@ const TrashClients = () => {
                               padding: 6,
                             }}
                           >
-                            <TbTrashOff style={{ fontSize: 20, color: "var(--primary-btn-bg)" }} />
+                            <TbTrashOff
+                              style={{
+                                fontSize: 20,
+                                color: "var(--primary-btn-bg)",
+                              }}
+                            />
                           </button>
 
-                          {/* Delete permanently */}
+                          {/* Delete permanently via DeleteModal */}
                           <button
                             type="button"
                             title="Delete forever"
-                            aria-label={`Delete ${user.name || "user"} permanently`}
+                            aria-label={`Delete ${
+                              user.name || "user"
+                            } permanently`}
                             onClick={(e) => {
                               e.stopPropagation();
-                              deleteUserForever(user.id);
+                              openDeleteModal(user);
                             }}
                             style={{
                               background: "transparent",
@@ -223,7 +270,12 @@ const TrashClients = () => {
                               marginLeft: 8,
                             }}
                           >
-                            <MdDeleteForever style={{ fontSize: 20, color: "var(--red-color)" }} />
+                            <MdDeleteForever
+                              style={{
+                                fontSize: 20,
+                                color: "var(--red-color)",
+                              }}
+                            />
                           </button>
                         </div>
                       </div>
@@ -257,7 +309,10 @@ const TrashClients = () => {
                     paginated.map((user) => (
                       <tr key={user.id}>
                         <td className="product-info admin-profile">
-                          <img src={`/uploads/${user.img}`} alt={`${user.name || "profile"}`} />
+                          <img
+                            src={`/uploads/${user.img}`}
+                            alt={`${user.name || "profile"}`}
+                          />
                           <span>{user.name}</span>
                         </td>
 
@@ -266,14 +321,22 @@ const TrashClients = () => {
                         <td>{rolesMap[user.id] || "-"}</td>
 
                         <td>
-                          <span className={`status ${user.status}`}>{user.status}</span>
+                          <span className={`status ${user.status}`}>
+                            {user.status}
+                          </span>
                         </td>
 
                         <td>{formatDate(user.created_at)}</td>
 
                         <td className="actions">
-                          <TbTrashOff onClick={() => restoreUser(user.id)} style={{ cursor: "pointer" }} />
-                          <MdDeleteForever onClick={() => deleteUserForever(user.id)} style={{ cursor: "pointer" }} />
+                          <TbTrashOff
+                            onClick={() => restoreUser(user.id)}
+                            style={{ cursor: "pointer" }}
+                          />
+                          <MdDeleteForever
+                            onClick={() => openDeleteModal(user)}
+                            style={{ cursor: "pointer" }}
+                          />
                         </td>
                       </tr>
                     ))
@@ -283,8 +346,12 @@ const TrashClients = () => {
 
               <div className="table-footer-pagination">
                 <span>
-                  Showing {startIndex + 1}-{Math.min(startIndex + PAGE_SIZE, filteredAdmins.length)} of{" "}
-                  {filteredAdmins.length}
+                  Showing {startIndex + 1}-
+                  {Math.min(
+                    startIndex + PAGE_SIZE,
+                    filteredAdmins.length
+                  )}{" "}
+                  of {filteredAdmins.length}
                 </span>
 
                 <ul className="pagination">
@@ -293,7 +360,13 @@ const TrashClients = () => {
                   </li>
 
                   {Array.from({ length: totalPages }).map((_, i) => (
-                    <li key={i} className={currentPage === i + 1 ? "active" : ""} onClick={() => changePage(i + 1)}>
+                    <li
+                      key={i}
+                      className={
+                        currentPage === i + 1 ? "active" : ""
+                      }
+                      onClick={() => changePage(i + 1)}
+                    >
                       {String(i + 1).padStart(2, "0")}
                     </li>
                   ))}
@@ -307,6 +380,14 @@ const TrashClients = () => {
           )}
         </div>
       </main>
+
+      {/* 🔥 Delete Modal hooked at root level */}
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleConfirmDelete}
+        propertyName={selectedUser?.name}
+      />
     </>
   );
 };

@@ -13,6 +13,8 @@ import { useNavigate } from "react-router-dom";
 import { FaFilter } from "react-icons/fa";
 
 
+import ConfirmModal from "../../../components/modals/ConfirmModal"; 
+
 const PAGE_SIZE = 5;
 
 // keep allowed roles in lowercase for consistent comparisons
@@ -26,6 +28,10 @@ const ManageAdmin = () => {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // 🔥 new: for confirm modal
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
@@ -42,7 +48,7 @@ const ManageAdmin = () => {
         // 1. Fetch all users
         const usersRes = await api.get("/users");
         const users = Array.isArray(usersRes.data) ? usersRes.data : [];
-        setClients(users.filter(u => u.status !== "trash"));
+        setClients(users.filter((u) => u.status !== "trash"));
 
         // 2. Fetch user-role mappings
         const mappingsRes = await api.get("/user-roles");
@@ -50,7 +56,7 @@ const ManageAdmin = () => {
 
         // Build map: user_id → array of role names (normalized to lowercase)
         const map = {};
-        mappings.forEach(m => {
+        mappings.forEach((m) => {
           if (!map[m.user_id]) map[m.user_id] = [];
           // m.role_name may be "seller" or "Seller" — normalize to lowercase
           map[m.user_id].push(String(m.role_name || "").toLowerCase());
@@ -58,7 +64,7 @@ const ManageAdmin = () => {
         setUserRolesMap(map);
       } catch (err) {
         console.error("Failed to load data:", err);
-        // toast.error("Failed to load clients"); // keep if you have toast
+        // toast.error("Failed to load clients");
       } finally {
         setLoading(false);
       }
@@ -81,7 +87,7 @@ const ManageAdmin = () => {
   const moveToTrash = async (id) => {
     try {
       await api.put(`/trash-user/${id}`, { status: "trash" });
-      setClients(prev => prev.filter(u => u.id !== id));
+      setClients((prev) => prev.filter((u) => u.id !== id));
       // toast.success("Moved to trash");
     } catch (err) {
       console.error(err);
@@ -89,8 +95,24 @@ const ManageAdmin = () => {
     }
   };
 
-  const handleEdit = (client) => navigate("/admin/edit-client", { state: { admin: client } });
-  const handleView = (client) => navigate("/admin/user-dashboard", { state: { admin: client } });
+  // 🔥 open confirm modal for trash
+  const openTrashConfirm = (user) => {
+    setSelectedUser(user);
+    setIsConfirmOpen(true);
+  };
+
+  // 🔥 when user confirms "Yes"
+  const handleConfirmTrash = async () => {
+    if (!selectedUser) return;
+    await moveToTrash(selectedUser.id);
+    setIsConfirmOpen(false);
+    setSelectedUser(null);
+  };
+
+  const handleEdit = (client) =>
+    navigate("/admin/edit-client", { state: { admin: client } });
+  const handleView = (client) =>
+    navigate("/admin/user-dashboard", { state: { admin: client } });
 
   // Filter by role + search
   const filteredClients = clients.filter((client) => {
@@ -119,7 +141,13 @@ const ManageAdmin = () => {
   const changePage = (p) => p >= 1 && p <= totalPages && setCurrentPage(p);
 
   const formatDate = (d) =>
-    d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "-";
+    d
+      ? new Date(d).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+      : "-";
 
   return (
     <>
@@ -141,7 +169,10 @@ const ManageAdmin = () => {
               className="ma-search-input"
             />
             {searchTerm && (
-              <button className="ma-clear-btn" onClick={() => setSearchTerm("")}>
+              <button
+                className="ma-clear-btn"
+                onClick={() => setSearchTerm("")}
+              >
                 ×
               </button>
             )}
@@ -156,14 +187,22 @@ const ManageAdmin = () => {
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
               <FaFilter className="filter-icon" />
-              <span>{selectedRole === "all" ? "All" : cap(selectedRole)}</span>
-              <IoChevronDown className={`dropdown-arrow ${isDropdownOpen ? "open" : ""}`} />
+              <span>
+                {selectedRole === "all" ? "All" : cap(selectedRole)}
+              </span>
+              <IoChevronDown
+                className={`dropdown-arrow ${
+                  isDropdownOpen ? "open" : ""
+                }`}
+              />
             </button>
 
             {isDropdownOpen && (
               <div className="dropdown-menu">
                 <div
-                  className={`dropdown-item ${selectedRole === "all" ? "active" : ""}`}
+                  className={`dropdown-item ${
+                    selectedRole === "all" ? "active" : ""
+                  }`}
                   onClick={() => {
                     setSelectedRole("all");
                     setIsDropdownOpen(false);
@@ -174,7 +213,9 @@ const ManageAdmin = () => {
                 {ALLOWED_ROLES.map((role) => (
                   <div
                     key={role}
-                    className={`dropdown-item ${selectedRole === role ? "active" : ""}`}
+                    className={`dropdown-item ${
+                      selectedRole === role ? "active" : ""
+                    }`}
                     onClick={() => {
                       setSelectedRole(role); // role is lowercase
                       setIsDropdownOpen(false);
@@ -187,7 +228,10 @@ const ManageAdmin = () => {
             )}
           </div>
 
-          <button className="ma-add-btn" onClick={() => navigate("/admin/add-new_client")}>
+          <button
+            className="ma-add-btn"
+            onClick={() => navigate("/admin/add-new_client")}
+          >
             Add Client
           </button>
         </div>
@@ -195,7 +239,9 @@ const ManageAdmin = () => {
         {/* TABLE & CARDS */}
         <div className="dashboard-table-container">
           {loading ? (
-            <p style={{ textAlign: "center", padding: "60px" }}>Loading clients...</p>
+            <p style={{ textAlign: "center", padding: "60px" }}>
+              Loading clients...
+            </p>
           ) : (
             <>
               {/* Mobile Cards */}
@@ -205,7 +251,8 @@ const ManageAdmin = () => {
                 ) : (
                   paginated.map((user) => {
                     const avatar = user.img ? `/uploads/${user.img}` : null;
-                    const firstName = user.name?.split(" ")[0] || "User";
+                    const firstName =
+                      user.name?.split(" ")[0] || "User";
                     return (
                       <CommonCard
                         key={user.id}
@@ -235,23 +282,41 @@ const ManageAdmin = () => {
                 </thead>
                 <tbody>
                   {paginated.length === 0 ? (
-                    <tr><td colSpan={7} className="ma-empty">No clients found</td></tr>
+                    <tr>
+                      <td colSpan={7} className="ma-empty">
+                        No clients found
+                      </td>
+                    </tr>
                   ) : (
                     paginated.map((user) => (
                       <tr key={user.id}>
                         <td className="product-info admin-profile">
-                          <img src={`/uploads/${user.img || "default.jpg"}`} alt="profile" />
+                          <img
+                            src={`/uploads/${user.img || "default.jpg"}`}
+                            alt="profile"
+                          />
                           <span>{user.name}</span>
                         </td>
                         <td>{user.email}</td>
                         <td>{user.number}</td>
-                        <td>{(userRolesMap[user.id] || []).map(r => cap(r)).join(", ") || "-"}</td>
-                        <td><span className={`status ${user.status}`}>{user.status}</span></td>
+                        <td>
+                          {(userRolesMap[user.id] || [])
+                            .map((r) => cap(r))
+                            .join(", ") || "-"}
+                        </td>
+                        <td>
+                          <span className={`status ${user.status}`}>
+                            {user.status}
+                          </span>
+                        </td>
                         <td>{formatDate(user.created_at)}</td>
                         <td className="actions">
                           <IoPencil onClick={() => handleEdit(user)} />
                           <IoIosEye onClick={() => handleView(user)} />
-                          <MdDeleteForever onClick={() => moveToTrash(user.id)} />
+                          {/* 🔥 open confirm modal instead of direct API */}
+                          <MdDeleteForever
+                            onClick={() => openTrashConfirm(user)}
+                          />
                         </td>
                       </tr>
                     ))
@@ -262,10 +327,17 @@ const ManageAdmin = () => {
               {/* Pagination */}
               <div className="table-footer-pagination">
                 <span>
-                  Showing {startIndex + 1}-{Math.min(startIndex + PAGE_SIZE, filteredClients.length)} of {filteredClients.length}
+                  Showing {startIndex + 1}-
+                  {Math.min(
+                    startIndex + PAGE_SIZE,
+                    filteredClients.length
+                  )}{" "}
+                  of {filteredClients.length}
                 </span>
                 <ul className="pagination">
-                  <li onClick={() => changePage(currentPage - 1)}><HiOutlineArrowLeft /></li>
+                  <li onClick={() => changePage(currentPage - 1)}>
+                    <HiOutlineArrowLeft />
+                  </li>
                   {Array.from({ length: totalPages }).map((_, i) => (
                     <li
                       key={i}
@@ -275,13 +347,33 @@ const ManageAdmin = () => {
                       {String(i + 1).padStart(2, "0")}
                     </li>
                   ))}
-                  <li onClick={() => changePage(currentPage + 1)}><HiOutlineArrowRight /></li>
+                  <li onClick={() => changePage(currentPage + 1)}>
+                    <HiOutlineArrowRight />
+                  </li>
                 </ul>
               </div>
             </>
           )}
         </div>
       </main>
+
+      {/* 🔥 Simple Confirm Modal for trash */}
+      <ConfirmModal
+        isOpen={isConfirmOpen}
+        onClose={() => {
+          setIsConfirmOpen(false);
+          setSelectedUser(null);
+        }}
+        onConfirm={handleConfirmTrash}
+        // title="Move to Trash?"
+        // message={
+        //   selectedUser
+        //     ? `Are you sure you want to move "${selectedUser.name}" to trash?`
+        //     : "Are you sure you want to move this user to trash?"
+        // }
+        // confirmLabel="Yes, Move"
+        // cancelLabel="Cancel"
+      />
     </>
   );
 };
