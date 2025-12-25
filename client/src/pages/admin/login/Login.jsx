@@ -30,12 +30,19 @@ const Login = () => {
       setInfo("Logging you in...");
 
       const res = await api.post("/login", { email, password });
-
       localStorage.setItem("accessToken", res.data.accessToken);
       localStorage.setItem("refreshToken", res.data.refreshToken);
 
-      setInfo("Login successful. Redirecting...");
+
+
+      const userRes = await api.get(`/me`);
+      localStorage.setItem("authUser", JSON.stringify(userRes.data.user));
+
+
       nav("/admin/manage-clients");
+      setInfo("Login successful. Redirecting...");
+
+
     } catch (err) {
       const message =
         err.response?.data?.error ||
@@ -48,14 +55,15 @@ const Login = () => {
     }
   };
 
+
+
+
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("accessToken")
-    if (isLoggedIn) {
-      nav("/admin/manage-clients")
-    } else {
-      nav("/admin/login")
+    if (localStorage.getItem("accessToken")) {
+      nav("/admin/manage-clients", { replace: true });
     }
-  }, [])
+  }, []);
+
 
   return (
     <div className="login-wrapper">

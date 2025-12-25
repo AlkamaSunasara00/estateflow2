@@ -6,23 +6,27 @@ import { HiOutlineArrowLeft } from 'react-icons/hi';
 import { FiMenu } from 'react-icons/fi';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import api from '../../../api/axiosInstance';
-import ConfirmModal from "../../../components/modals/ConfirmModal"; 
+import ConfirmModal from "../../../components/modals/ConfirmModal";
 
 
 
 function MyProfile() {
-    const [userRoles, setUserRoles] = useState([]);
-    const [userRolesId, setUserRolesId] = useState([]);
-    const [matchedRoles, setMatchedRoles] = useState([]);
 
     const navigate = useNavigate();
     const { state } = useLocation();
-     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-     const [selectedUser,setSelectedUser]=useState([])
-    const user = state?.admin;
+
+    const [userRoles, setUserRoles] = useState([]);
+    const [userRolesId, setUserRolesId] = useState([]);
+    const [matchedRoles, setMatchedRoles] = useState([]);
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState([])
+
+    const authUser = JSON.parse(localStorage.getItem("authUser"));
+
+    const user = state?.admin || authUser;
     const id = user.id;
 
-    
+
 
     const ROLE_MAP = {
         1: 'Admin',
@@ -65,10 +69,10 @@ function MyProfile() {
         }
     };
     //  open confirm modal for trash
-  const openTrashConfirm = () => {
-    setSelectedUser(user);
-    setIsConfirmOpen(true);
-  };
+    const openTrashConfirm = () => {
+        setSelectedUser(user);
+        setIsConfirmOpen(true);
+    };
 
     const profileData = {
         name: user.name || "",
@@ -115,7 +119,7 @@ function MyProfile() {
                                     <button className="primary-btn" onClick={handleEdit}>
                                         <FaEdit /> Edit
                                     </button>
-                                    <button className="delete-btn"  onClick={() => openTrashConfirm()}>
+                                    <button className="delete-btn" onClick={() => openTrashConfirm()}>
                                         <FaTrash /> Delete
                                     </button>
                                 </div>
@@ -200,22 +204,22 @@ function MyProfile() {
                     </div>
                 </div>
             </div>
- <ConfirmModal
-        isOpen={isConfirmOpen}
-        onClose={() => {
-          setIsConfirmOpen(false);
-          setSelectedUser(null);
-        }}
-        onConfirm={moveToTrash}
-        // title="Move to Trash?"
-        // message={
-        //   selectedUser
-        //     ? `Are you sure you want to move "${selectedUser.name}" to trash?`
-        //     : "Are you sure you want to move this user to trash?"
-        // }
-        // confirmLabel="Yes, Move"
-        // cancelLabel="Cancel"
-      />
+            <ConfirmModal
+                isOpen={isConfirmOpen}
+                onClose={() => {
+                    setIsConfirmOpen(false);
+                    setSelectedUser(null);
+                }}
+                onConfirm={moveToTrash}
+            // title="Move to Trash?"
+            // message={
+            //   selectedUser
+            //     ? `Are you sure you want to move "${selectedUser.name}" to trash?`
+            //     : "Are you sure you want to move this user to trash?"
+            // }
+            // confirmLabel="Yes, Move"
+            // cancelLabel="Cancel"
+            />
         </>
     );
 }

@@ -13,7 +13,7 @@ const verifyToken = require("../../middleware/verifyToken");
 
 const loginLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 5,                   // 10 min me max 5 login attempts per IP
+  max: 500,                   // 10 min me max 5 login attempts per IP
   message: {
     error: "Too many login attempts. Please try again after some time.",
   },

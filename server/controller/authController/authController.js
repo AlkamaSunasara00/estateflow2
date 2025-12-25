@@ -154,7 +154,7 @@ const me = (req, res) => {
   const id = req.user.id;
 
   const userSQL = `
-    SELECT id, name, email FROM users WHERE id = ? LIMIT 1
+    SELECT id, name, email, number, alt_number, img, status, address FROM users WHERE id = ? LIMIT 1
     `;
 
   connection.query(userSQL, [id], (err, rows) => {

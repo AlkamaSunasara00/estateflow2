@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { FaFilter } from "react-icons/fa";
 
 
-import ConfirmModal from "../../../components/modals/ConfirmModal"; 
+import ConfirmModal from "../../../components/modals/ConfirmModal";
 
 const PAGE_SIZE = 5;
 
@@ -110,7 +110,7 @@ const ManageAdmin = () => {
   };
 
   const handleEdit = (client) =>
-    navigate("/admin/edit-client", { state: { admin: client } });
+    navigate("/admin/edit-client", { state: { user: client } });
   const handleView = (client) =>
     navigate("/admin/user-dashboard", { state: { admin: client } });
 
@@ -143,10 +143,10 @@ const ManageAdmin = () => {
   const formatDate = (d) =>
     d
       ? new Date(d).toLocaleDateString("en-IN", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
       : "-";
 
   return (
@@ -191,18 +191,16 @@ const ManageAdmin = () => {
                 {selectedRole === "all" ? "All" : cap(selectedRole)}
               </span>
               <IoChevronDown
-                className={`dropdown-arrow ${
-                  isDropdownOpen ? "open" : ""
-                }`}
+                className={`dropdown-arrow ${isDropdownOpen ? "open" : ""
+                  }`}
               />
             </button>
 
             {isDropdownOpen && (
               <div className="dropdown-menu">
                 <div
-                  className={`dropdown-item ${
-                    selectedRole === "all" ? "active" : ""
-                  }`}
+                  className={`dropdown-item ${selectedRole === "all" ? "active" : ""
+                    }`}
                   onClick={() => {
                     setSelectedRole("all");
                     setIsDropdownOpen(false);
@@ -213,9 +211,8 @@ const ManageAdmin = () => {
                 {ALLOWED_ROLES.map((role) => (
                   <div
                     key={role}
-                    className={`dropdown-item ${
-                      selectedRole === role ? "active" : ""
-                    }`}
+                    className={`dropdown-item ${selectedRole === role ? "active" : ""
+                      }`}
                     onClick={() => {
                       setSelectedRole(role); // role is lowercase
                       setIsDropdownOpen(false);
@@ -365,14 +362,14 @@ const ManageAdmin = () => {
           setSelectedUser(null);
         }}
         onConfirm={handleConfirmTrash}
-        // title="Move to Trash?"
-        // message={
-        //   selectedUser
-        //     ? `Are you sure you want to move "${selectedUser.name}" to trash?`
-        //     : "Are you sure you want to move this user to trash?"
-        // }
-        // confirmLabel="Yes, Move"
-        // cancelLabel="Cancel"
+      // title="Move to Trash?"
+      // message={
+      //   selectedUser
+      //     ? `Are you sure you want to move "${selectedUser.name}" to trash?`
+      //     : "Are you sure you want to move this user to trash?"
+      // }
+      // confirmLabel="Yes, Move"
+      // cancelLabel="Cancel"
       />
     </>
   );

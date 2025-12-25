@@ -47,26 +47,3 @@ setInterval(() => {
   blacklistExpiredTokens();
   deleteOldBlacklistedTokens();
 }, 60 * 60 * 1000);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

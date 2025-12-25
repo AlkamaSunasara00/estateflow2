@@ -1,6 +1,5 @@
 /* SalesBookingCard.css */
 
-/* Page Container - Same as admin-panel-header-div structure */
 .sales-page-container {
   font-family: var(--info-font);
   background-color: var(--light-white-color);
@@ -14,22 +13,23 @@
   transition: all 0.3s ease;
 }
 
-/* Sales Card */
 .sales-booking-card {
   background-color: var(--white-color);
   border-radius: 16px;
-  padding: 20px;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.08);
   width: 100%;
   max-width: 100%;
+  margin-bottom: 16px;
 }
 
-/* Header */
 .sales-card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+ 
+}
+.sales-header{
+   margin: 13px 10px;
 }
 
 .sales-title {
@@ -53,9 +53,9 @@
   width: auto;
   border-radius: 4px;
 }
-
-.sales-toggle-btn:hover {
-  background-color: var(--light-white-color);
+.add-sell-button{
+  display: flex;
+  align-items: center;
 }
 
 .sales-toggle-btn.expanded {

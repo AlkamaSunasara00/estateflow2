@@ -75,7 +75,8 @@ const Properties = () => {
     }
   };
 
-  const openDetails = (p) => navigate(`/admin/property/${p.id}`, { state: { item: p } });
+  // const openDetails = (p) => navigate(`/admin/property/${p.id}`, { state: { item: p } });
+
   const onEdit = (e, p) => {
     e.stopPropagation();
     navigate(`/admin/properties/edit/${p.id}`);
@@ -180,7 +181,7 @@ const Properties = () => {
                       avatar={p.image ? `/uploads/${p.image}` : null}
                       title={p.title}
                       meta={p.address}
-                      onClick={() => openDetails(p)}
+                      // onClick={() => openDetails(p)}
                       compact
                     />
                   ))
@@ -206,7 +207,8 @@ const Properties = () => {
                     </tr>
                   ) : (
                     paginated.map((p) => (
-                      <tr key={p.id} onClick={() => openDetails(p)}>
+                      // <tr key={p.id} onClick={() => openDetails(p)}>
+                      <tr key={p.id}>
                         <td className="product-info">
                           <img src={`/uploads/${p.image || "defaultpropertyimage.png"}`} alt={p.title} />
                           <span>{p.title}</span>
@@ -221,7 +223,7 @@ const Properties = () => {
                         <td>{p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "-"}</td>
                         <td className="actions">
                           <IoPencil onClick={(e) => onEdit(e, p)} />
-                          <IoIosEye onClick={(e) => { e.stopPropagation(); openDetails(p); }} />
+                          {/* <IoIosEye onClick={(e) => { e.stopPropagation(); openDetails(p); }} /> */}
                           <MdDeleteForever onClick={(e) => handleDeleteClick(e, p)} />
                         </td>
                       </tr>
