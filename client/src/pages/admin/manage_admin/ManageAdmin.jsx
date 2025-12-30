@@ -225,10 +225,7 @@ const ManageAdmin = () => {
             Add Client
           </button>
         </div>
-
-        {/* TABLE & CARDS WITH LOADING OVERLAY */}
         <div className="dashboard-table-container">
-          {/* Loading Overlay */}
           {loading && (
             <div className="loading-overlay">
               <div className="loader-spinner"></div>
@@ -236,9 +233,7 @@ const ManageAdmin = () => {
             </div>
           )}
 
-          {/* Main Content (blurred when loading) */}
           <div className={`table-content ${loading ? "blurred" : ""}`}>
-            {/* Mobile Cards */}
             <div className="card-list">
               {paginated.length === 0 ? (
                 <div className="ma-empty">No clients found</div>
@@ -259,8 +254,6 @@ const ManageAdmin = () => {
                 })
               )}
             </div>
-
-            {/* Desktop Table */}
             <table>
               <thead>
                 <tr>
