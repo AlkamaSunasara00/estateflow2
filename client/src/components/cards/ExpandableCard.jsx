@@ -18,7 +18,6 @@ const ExpandableCard = ({
         style={{ marginBottom: open ? "20px" : "0" }}
       >
         <div>{headerLeft}</div>
-
         <button
           className={`sales-toggle-btn ${open ? "expanded" : ""}`}
           onClick={() => setOpen(!open)}

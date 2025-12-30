@@ -1,4 +1,15 @@
-/* components/common/ExpandableCard/ExpandableCard.css */
+.sales-page-container {
+  font-family: var(--info-font);
+  background-color: var(--light-white-color);
+  width: 100%;
+  padding: 16px 14px 24px 14px;
+  position: fixed;
+  height: calc(100vh - var(--navbar-height));
+  left: 0;
+  top: var(--navbar-height);
+  overflow-y: auto;
+  transition: all 0.3s ease;
+}
 
 .sales-booking-card {
   background-color: var(--white-color);
@@ -7,7 +18,7 @@
   width: 100%;
   max-width: 100%;
   margin-bottom: 16px;
-  padding: 20px; /* BASE PADDING (mobile) */
+  padding: 20px;
 }
 
 /* ================= HEADER ================= */
@@ -16,6 +27,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+ 
+}
+.sales-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--light-black-color);
+  margin: 0;
+  font-family: var(--info-font);
+}
+.sales-header{
+   margin: 13px 10px;
 }
 
 /* Toggle Icon */
@@ -31,9 +53,17 @@
   transition: transform 0.3s ease;
   border-radius: 4px;
 }
-
+.add-sell-button{
+  display: flex;
+  align-items: center;
+}
 .sales-toggle-btn.expanded {
   transform: rotate(180deg);
+}
+.sales-divider {
+  height: 1px;
+  background-color: var(--primary-border-color);
+  margin-bottom: 20px;
 }
 
 /* ================= BODY ================= */
@@ -146,9 +176,23 @@
   .sales-booking-card {
     padding: 24px;
   }
+    .sales-title {
+    font-size: 21px;
+  }
 }
 
 @media (min-width: 1025px) {
+  .sales-booking-card {
+    padding: 28px;
+  }
+   .sales-title {
+    font-size: 22px;
+  }
+  .sales-page-container {
+    width: calc(100% - 250px);
+    left: 250px;
+  }
+
   .sales-booking-card {
     padding: 28px;
   }
@@ -157,5 +201,8 @@
 @media (min-width: 1440px) {
   .sales-booking-card {
     padding: 32px;
+  }
+   .sales-title {
+    font-size: 24px;
   }
 }
