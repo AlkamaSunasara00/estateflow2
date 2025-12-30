@@ -341,7 +341,7 @@
   .desktop-save-wrapper { display: none !important; }
   .sticky-bottom-save { display: block !important; }
   .form-content-after-header { padding: 16px 12px 16px; }
-  .add-form-header { padding: 16px 12px; }
+  .add-form-header { padding: 15px 12px; }
 }
 
 @media (min-width: 768px) {
