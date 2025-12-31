@@ -13,7 +13,6 @@ function UserDashboard() {
 
     const { state } = useLocation();
     const client = state?.user;
-    console.log(client.name)
 
     const navigate = useNavigate()
 
