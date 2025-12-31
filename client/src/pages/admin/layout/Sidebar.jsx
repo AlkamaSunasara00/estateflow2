@@ -1,8 +1,8 @@
 // src/components/admin/Sidebar.jsx
 import React, { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { RxDashboard } from "react-icons/rx";
-import { RiAdminLine,RiProductHuntLine } from "react-icons/ri";
+import { RiAdminLine, RiProductHuntLine } from "react-icons/ri";
 import { FiLogOut, FiX } from "react-icons/fi";
 import { CgProfile } from "react-icons/cg";
 import { FaTrashArrowUp } from "react-icons/fa6";
@@ -10,11 +10,16 @@ import { FaTrashArrowUp } from "react-icons/fa6";
 
 
 import "../../../assets/css/admin/sidebar.css";
+import { useActiveUser } from "../../../context/ActiveUserContext";
 
 const Sidebar = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
+
+  const { setUserId } = useActiveUser();
+
+  const navigate = useNavigate()
 
   // Detect screen size (mobile / tablet / desktop)
   useEffect(() => {
@@ -57,6 +62,11 @@ const Sidebar = () => {
       setIsSidebarOpen(false);
     }, 120);
   };
+
+  const handleNavigateToMyProfile = () => {
+    setUserId(null);
+    sessionStorage.removeItem("activeUserId")
+  }
 
   // Scroll lock when sidebar is open on small screens
   useEffect(() => {
@@ -155,8 +165,9 @@ const Sidebar = () => {
                 <span>Clients</span>
               </NavLink>
             </li>
-            <li>
-              <NavLink to="/admin/profile" onClick={handleNavClick}>
+            <li >
+              <NavLink to="/admin/profile" onClick={()=> {handleNavClick(); handleNavigateToMyProfile();}}>
+
                 <CgProfile />
                 <span>My Profile</span>
               </NavLink>

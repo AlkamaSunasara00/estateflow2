@@ -14,6 +14,7 @@ import { FaFilter } from "react-icons/fa";
 
 
 import ConfirmModal from "../../../components/modals/ConfirmModal";
+import { useActiveUser } from "../../../context/ActiveUserContext";
 
 const PAGE_SIZE = 5;
 
@@ -21,6 +22,9 @@ const PAGE_SIZE = 5;
 const ALLOWED_ROLES = ["buyer", "seller", "broker", "retailer"];
 
 const ManageAdmin = () => {
+
+  const { setUserId } = useActiveUser();
+
   const [clients, setClients] = useState([]);
   const [userRolesMap, setUserRolesMap] = useState({}); // user_id → [role_names (lowercase)]
   const [selectedRole, setSelectedRole] = useState("all"); // use 'all' lowercase internally
@@ -111,8 +115,11 @@ const ManageAdmin = () => {
 
   const handleEdit = (client) =>
     navigate("/admin/edit-client", { state: { user: client } });
-  const handleView = (client) =>
-    navigate("/admin/user-dashboard", { state: { user: client } });
+
+  const openUser = (user) => {
+    setUserId(user.id);
+    navigate("/admin/user-dashboard");
+  };
 
   // Filter by role + search
   const filteredClients = clients.filter((client) => {
@@ -256,7 +263,7 @@ const ManageAdmin = () => {
                         avatar={avatar}
                         title={firstName}
                         meta={user.number || "No phone"}
-                        onClick={() => handleView(user)}
+                        onClick={() => openUser(user)}
                         compact
                       />
                     );
@@ -309,7 +316,7 @@ const ManageAdmin = () => {
                         <td>{formatDate(user.created_at)}</td>
                         <td className="actions">
                           <IoPencil onClick={() => handleEdit(user)} />
-                          <IoIosEye onClick={() => handleView(user)} />
+                          <IoIosEye onClick={() => openUser(user)} />
                           <MdDeleteForever
                             onClick={() => openTrashConfirm(user)}
                           />

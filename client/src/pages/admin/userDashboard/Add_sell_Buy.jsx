@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../layout/Sidebar";
 import { HiOutlineArrowLeft } from "react-icons/hi";
 import { FiMenu } from "react-icons/fi";
@@ -8,26 +8,70 @@ import api from "../../../api/axiosInstance";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "../../../assets/css/admin/common/form.css";
+import useMe from "../../../hooks/useMe";
+import { useActiveUser } from "../../../context/ActiveUserContext";
 
 const AddSellBuy = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const [client, setClient] = useState([])
 
-  // 🔥 Detect mode from path
+  const { userId } = useActiveUser();
+
+  useEffect(() => {
+    if (!userId) return;
+    api.get(`/users/${userId}`).then(res => setClient(res.data));
+  }, [userId]);
+
+  const { me } = useMe();
+
+  // detect mode
   const isSell = location.pathname.includes("addsell");
   const pageTitle = isSell ? "Add Sale" : "Add Purchase";
 
   const [form, setForm] = useState({
     property_id: "",
-    seller_id: "",
     buyer_id: "",
+    seller_id: "",
     assigned_by: "",
     amount: "",
     details: "",
   });
 
+  const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // ---------------- AUTO SET BUYER / SELLER + ASSIGNED BY ----------------
+  useEffect(() => {
+    if (client) {
+      if (isSell) {
+        setForm((p) => ({ ...p, buyer_id: client.id }));
+      } else {
+        setForm((p) => ({ ...p, seller_id: client.id }));
+      }
+    }
+  }, [client, isSell]);
+
+  useEffect(() => {
+    if (me) {
+      setForm((p) => ({ ...p, assigned_by: me.id }));
+    }
+  }, [me]);
+
+  // ---------------- FETCH PROPERTIES ----------------
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  const fetchProperties = async () => {
+    try {
+      const res = await api.get("/getproperties");
+      setProperties(res.data || []);
+    } catch {
+      toast.error("Failed to load properties");
+    }
+  };
+
+  // ---------------- HANDLERS ----------------
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
@@ -35,8 +79,8 @@ const AddSellBuy = () => {
 
   const isValid = () => {
     if (!form.property_id || !form.amount || !form.assigned_by) return false;
-    if (isSell && !form.seller_id) return false;
-    if (!isSell && !form.buyer_id) return false;
+    if (isSell && !form.buyer_id) return false;
+    if (!isSell && !form.seller_id) return false;
     return true;
   };
 
@@ -53,11 +97,13 @@ const AddSellBuy = () => {
         details: form.details,
       };
 
-      // 🔥 Conditional field
-      if (isSell) payload.seller_id = form.seller_id;
-      else payload.buyer_id = form.buyer_id;
+      if (isSell) payload.buyer_id = form.buyer_id;
+      else payload.seller_id = form.seller_id;
 
-      const apiPath = isSell ? "/add-sale" : "/add-purchase";
+      const apiPath = isSell
+        ? "/addsellproperty"
+        : "/addbuyproperty";
+
       await api.post(apiPath, payload);
 
       toast.success(`${pageTitle} added successfully`);
@@ -73,6 +119,7 @@ const AddSellBuy = () => {
     if (window.toggleAdminSidebar) window.toggleAdminSidebar();
   };
 
+  // ---------------- JSX ----------------
   return (
     <>
       <Sidebar />
@@ -83,13 +130,8 @@ const AddSellBuy = () => {
           <Link to={-1} className="back-arrow-btn">
             <HiOutlineArrowLeft />
           </Link>
-
           <h5>{pageTitle}</h5>
-
-          <button
-            className="form-hamburger-btn"
-            onClick={handleHamburgerClick}
-          >
+          <button className="form-hamburger-btn" onClick={handleHamburgerClick}>
             <FiMenu />
           </button>
         </div>
@@ -97,79 +139,75 @@ const AddSellBuy = () => {
         {/* FORM */}
         <div className="form-content-after-header">
           <form onSubmit={handleSubmit} className="form-layout">
-
-            {/* LEFT COLUMN */}
+            {/* LEFT */}
             <div>
               <div className="form-card">
                 <h6>Transaction Information</h6>
 
+                {/* PROPERTY */}
                 <div className="form-group">
-                  <label>Property ID *</label>
-                  <input
-                    type="text"
+                  <label>Property *</label>
+                  <select
                     name="property_id"
                     value={form.property_id}
                     onChange={handleChange}
-                    placeholder="Enter property ID"
-                  />
+                  >
+                    <option value="">Select Property</option>
+                    {properties.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        #{p.id} — {p.title || p.property_name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
+                {/* BUYER / SELLER (READONLY) */}
                 {isSell ? (
                   <div className="form-group">
-                    <label>Seller ID *</label>
+                    <label>Buyer</label>
                     <input
-                      type="number"
-                      name="seller_id"
-                      value={form.seller_id}
-                      onChange={handleChange}
-                      placeholder="Enter seller ID"
+                      type="text"
+                      value={`${client?.id || ""} - ${client?.name || ""}`}
+                      readOnly
                     />
                   </div>
                 ) : (
                   <div className="form-group">
-                    <label>Buyer ID *</label>
+                    <label>Seller</label>
                     <input
-                      type="number"
-                      name="buyer_id"
-                      value={form.buyer_id}
-                      onChange={handleChange}
-                      placeholder="Enter buyer ID"
+                      type="text"
+                      value={`${client?.id || ""} - ${client?.name || ""}`}
+                      readOnly
                     />
                   </div>
                 )}
 
+                {/* ASSIGNED BY (READONLY) */}
                 <div className="form-group">
-                  <label>Assigned By *</label>
+                  <label>Assigned By</label>
                   <input
-                    type="number"
-                    name="assigned_by"
-                    value={form.assigned_by}
-                    onChange={handleChange}
-                    placeholder="Admin / Staff ID"
+                    type="text"
+                    value={me ? `${me.id} - ${me.name}` : ""}
+                    readOnly
                   />
                 </div>
               </div>
 
               <div className="form-card">
                 <h6>Additional Details</h6>
-
-                <div className="form-group">
-                  <label>Details</label>
-                  <textarea
-                    name="details"
-                    value={form.details}
-                    onChange={handleChange}
-                    placeholder="Optional notes"
-                  />
-                </div>
+                <textarea
+                  name="details"
+                  value={form.details}
+                  onChange={handleChange}
+                  placeholder="Optional notes"
+                />
               </div>
             </div>
 
-            {/* RIGHT COLUMN */}
+            {/* RIGHT */}
             <div>
               <div className="form-card">
                 <h6>Payment</h6>
-
                 <div className="form-group">
                   <label>Amount *</label>
                   <input
@@ -177,12 +215,10 @@ const AddSellBuy = () => {
                     name="amount"
                     value={form.amount}
                     onChange={handleChange}
-                    placeholder="Enter amount"
                   />
                 </div>
               </div>
 
-              {/* DESKTOP SAVE */}
               <div className="desktop-save-wrapper">
                 <button
                   className="desktop-save-btn"
@@ -198,10 +234,7 @@ const AddSellBuy = () => {
 
         {/* MOBILE SAVE */}
         <div className="sticky-bottom-save">
-          <button
-            onClick={handleSubmit}
-            disabled={!isValid() || loading}
-          >
+          <button onClick={handleSubmit} disabled={!isValid() || loading}>
             {loading ? "Saving..." : "Save & Continue"}
           </button>
         </div>

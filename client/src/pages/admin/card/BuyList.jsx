@@ -5,14 +5,23 @@ import { Calendar, Plus, X } from "lucide-react";
 import Navbar from "../layout/Navbar";
 import Sidebar from "../layout/Sidebar";
 import { FiMenu } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { HiOutlineArrowLeft } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
+import { useActiveUser } from "../../../context/ActiveUserContext";
 
 
 const BuyList = () => {
   const [buys, setBuys] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [client, setClient] = useState([])
+
+  const { userId } = useActiveUser();
+
+  useEffect(() => {
+    if (!userId) return;
+    api.get(`/users/${userId}`).then(res => setClient(res.data));
+  }, [userId]);
 
   const navigate = useNavigate();
 
@@ -33,6 +42,7 @@ const BuyList = () => {
   };
 
   if (loading) return <p>Loading...</p>;
+  const handleNavigateToBuyForm = () => navigate("/admin/buycard/buysell", { state: { client } });
 
   return (
     <>
@@ -61,7 +71,7 @@ const BuyList = () => {
             <h2 className="sales-title">Purchases</h2>
             <button
               className="primary-btn add-sell-button"
-              onClick={() => navigate("/admin/buycard/buysell")}
+              onClick={() => handleNavigateToBuyForm(client)}
             >
               <Plus size={16} />
               Add Buy
