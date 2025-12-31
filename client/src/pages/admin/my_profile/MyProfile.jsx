@@ -7,16 +7,35 @@ import { FiMenu } from "react-icons/fi";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import api from "../../../api/axiosInstance";
 import ConfirmModal from "../../../components/modals/ConfirmModal";
+import { useActiveUser } from "../../../context/ActiveUserContext";
 
 function MyProfile() {
   const navigate = useNavigate();
-  const { state } = useLocation();
 
   const [matchedRoles, setMatchedRoles] = useState([]);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-
   const authUser = JSON.parse(localStorage.getItem("authUser"));
-  const user = state?.client || authUser;
+
+  const [user, setUser] = useState([]);
+
+
+  const { userId } = useActiveUser();
+
+  useEffect(() => {
+    if (userId) {
+      api.get(`/users/${userId}`).then((res) => {
+        setUser(res.data);
+      });
+      return;
+    }
+
+    if (authUser) {
+      setUser(authUser);
+    }
+  }, [userId]);
+
+
+
 
   const ROLE_MAP = {
     1: "Admin",
@@ -115,33 +134,33 @@ function MyProfile() {
               <h6>User information</h6>
 
               <div className="info-row">
-                  <span>Full Name</span>
-                  <strong>{profileData.name}</strong>
-                </div>
+                <span>Full Name</span>
+                <strong>{profileData.name}</strong>
+              </div>
 
+              <div className="info-row">
+                <span>Email</span>
+                <strong>{profileData.email}</strong>
+              </div>
+
+              <div className="info-row">
+                <span>Phone</span>
+                <strong>{profileData.phone}</strong>
+              </div>
+
+              {profileData.altPhone && (
                 <div className="info-row">
-                  <span>Email</span>
-                  <strong>{profileData.email}</strong>
+                  <span>Alt Phone</span>
+                  <strong>{profileData.altPhone}</strong>
                 </div>
-
-                <div className="info-row">
-                  <span>Phone</span>
-                  <strong>{profileData.phone}</strong>
-                </div>
-
-                {profileData.altPhone && (
-                  <div className="info-row">
-                    <span>Alt Phone</span>
-                    <strong>{profileData.altPhone}</strong>
-                  </div>
-                )}
+              )}
             </div>
 
             {/* ===== ADDRESS ===== */}
             <div className="profile-section">
               <h6>Address information</h6>
               <div className="info-row">
-              <span>Address</span>
+                <span>Address</span>
                 <strong>{profileData.address}</strong>
               </div>
             </div>

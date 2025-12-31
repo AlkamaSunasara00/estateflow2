@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ShoppingCart, TrendingUp, Package, Briefcase } from 'lucide-react';
 import '../../../assets/css/admin/pages/userDashboard.css';
 import Sidebar from '../layout/Sidebar';
@@ -8,16 +8,31 @@ import inventorySide from "../../../assets/image/inventorySide.png";
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { HiOutlineArrowLeft } from 'react-icons/hi';
 import { FiMenu } from 'react-icons/fi';
+import { useActiveUser } from '../../../context/ActiveUserContext';
+import api from '../../../api/axiosInstance';
 
 function UserDashboard() {
 
-    const { state } = useLocation();
-    const client = state?.user;
-    console.log(client.name)
+    const [client, setClient] = useState([])
 
     const navigate = useNavigate()
 
-    const handleProfile = () => navigate("/admin/profile", { state: { client } });
+    const { userId } = useActiveUser();
+
+    useEffect(() => {
+        if (!userId) {
+            navigate("/admin/manage-clients");
+            return;
+        }
+        api.get(`/users/${userId}`).then(res => setClient(res.data));
+    }, [userId]);
+
+
+
+
+    const handleProfile = () => navigate("/admin/profile");
+    const handleNavigateToSell = () => navigate("/admin/salescard");
+    const handleNavigateToBuy = () => navigate("/admin/buycard");
     const handleHamburgerClick = () => {
         if (window.toggleAdminSidebar) window.toggleAdminSidebar();
     };
@@ -46,9 +61,7 @@ function UserDashboard() {
                             <div className="card-text-section">
                                 <h6>Purchase</h6>
                                 <p>You can save your ride booking View, Confirm or Cancel Bookings.</p>
-                                <NavLink to={'/admin/buycard'}>
-                                    <button className="card-action-btn">VIEW DETAILS</button>
-                                </NavLink>
+                                <button className="card-action-btn" onClick={() => handleNavigateToBuy(client)}>VIEW DETAILS</button>
                             </div>
                             <div className="card-icon-section" >
                                 <div className="icon-wrapper" >
@@ -64,9 +77,7 @@ function UserDashboard() {
                             <div className="card-text-section">
                                 <h6>Sales</h6>
                                 <p>You can see your Account or you can edit the profile if you want.</p>
-                                <NavLink to={'/admin/salescard'}>
-                                    <button className="card-action-btn">VIEW DETAILS</button>
-                                </NavLink>
+                                <button className="card-action-btn" onClick={() => handleNavigateToSell(client)}>VIEW DETAILS</button>
                             </div>
                             <div className="card-icon-section" >
                                 <div className="icon-wrapper" >
