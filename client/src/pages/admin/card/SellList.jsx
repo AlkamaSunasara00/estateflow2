@@ -1,48 +1,54 @@
 import React, { useEffect, useState } from "react";
-import ExpandableCard from "../../../components/cards/ExpandableCard";
-import api from "../../../api/axiosInstance";
-import { Calendar, Plus, X } from "lucide-react";
-import Navbar from "../layout/Navbar";
 import Sidebar from "../layout/Sidebar";
-import { FiMenu } from "react-icons/fi";
-import { Link, useLocation } from "react-router-dom";
 import { HiOutlineArrowLeft } from "react-icons/hi";
-import { useNavigate } from "react-router-dom";
+import { FiMenu } from "react-icons/fi";
+import { Plus } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../../../api/axiosInstance";
 import { useActiveUser } from "../../../context/ActiveUserContext";
+import ExpandableCard from "../../../components/cards/ExpandableCard";
+
 
 
 const SellList = () => {
   const [sells, setSells] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [client, setClient] = useState([])
+  const [client, setClient] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [openHistories, setOpenHistories] = useState({});
+  const [openRejections, setOpenRejections] = useState({});
 
   const { userId } = useActiveUser();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!userId) return;
     api.get(`/users/${userId}`).then(res => setClient(res.data));
   }, [userId]);
 
-  const navigate = useNavigate();
-
-
   useEffect(() => {
-    fetchSells();
+    api.get("/getsellproperties").then(res => setSells(res.data || []));
   }, []);
 
-  const fetchSells = async () => {
-    try {
-      const res = await api.get("/getsellproperties");
-      setSells(res.data || []);
-    } catch (err) {
-      console.error("Failed to fetch sells", err);
-    } finally {
-      setLoading(false);
-    }
+  const toggleHistory = (id) => {
+    setOpenHistories(prev => ({ ...prev, [id]: !prev[id] }));
   };
-  const handleNavigateToSellForm = () => navigate("/admin/salescard/addsell");
+
+  const toggleRejection = (sellId, payId) => {
+    setOpenRejections(prev => ({
+      ...prev,
+      [`${sellId}-${payId}`]: !prev[`${sellId}-${payId}`]
+    }));
+  };
+
+  const handleAddSell = () => navigate("/admin/salescard/addsell");
 
   if (loading) return <p>Loading...</p>;
+
+  const mockPayments = () => [
+    { id: 1, amount: 10000, status: "Deleted", date: "11/11/2025", reason: "Hekk" },
+    { id: 2, amount: 19998, status: "Completed", date: "12/11/2025" },
+    { id: 3, amount: 1312, status: "Deleted", date: "11/11/2025" },
+  ];
 
   return (
     <>
@@ -53,82 +59,48 @@ const SellList = () => {
           <Link to="/admin/user-dashboard" className="back-arrow-btn">
             <HiOutlineArrowLeft />
           </Link>
-
-          <h5>{client.name}</h5>
-
+          <h5>{client?.name || "Client"}</h5>
           <button
             className="form-hamburger-btn"
-            onClick={() =>
-              window.toggleAdminSidebar && window.toggleAdminSidebar()
-            }
+            onClick={() => window.toggleAdminSidebar?.()}
           >
             <FiMenu />
           </button>
         </div>
+
         <div className="sales-page-container">
-          {/* SALES TITLE BAR */}
-          <div className="sales-card-header sales-header">
-            <h2 className="sales-title">Sales</h2>
-            <button
-              className="primary-btn add-sell-button"
-              onClick={() => handleNavigateToSellForm(client)}
-            >
-              <Plus size={16} />
-              Add Sell
-            </button>
-          </div>
-
-          <div className="sales-divider" />
-          {sells.map((item, index) => (
-            <ExpandableCard
-              key={item.id}
-              headerLeft={
-
-                <>
-                  <div className="booking-id">
-                    #{index + 1}
-                  </div>
-                  <div className="complex-name">
-                    {item.title}
-                  </div>
-
-                </>
-              }
-            >
-              <div className="booking-date">
-                <Calendar size={16} />
-                <span>
-                  {new Date(item.created_at).toLocaleDateString()}
-                </span>
-              </div>
-
-              <div className="booking-amount-section">
-                <div className="booking-amount">
-                  Amount:
-                  <span className="amount-value">
-                    ₹{item.amount}
-                  </span>
-                </div>
-              </div>
-
-              {/* {item.details && (
-                <div className="sales-extra-content">
-                  {item.details}
-                </div>
-              )} */}
-
-              <button className="cancel-booking-btn">
-                <X size={18} />
-                Cancel Sales
+            <div className="sales-page-title-bar">
+              <h2 className="sales-page-title">Sales</h2>
+              <button className="primary-btn add-sell-btn" onClick={handleAddSell}>
+                <Plus size={16} />
+                Add Sell
               </button>
-            </ExpandableCard>
-          ))}
+            </div>
+
+            <div className="sales-divider" />
+
+            {sells.map((item, index) => (
+              <ExpandableCard
+                key={item.id}
+                id={item.id}
+                index={index}
+                title={item.title}
+                amount={item.amount}
+                date={new Date(item.created_at).toLocaleDateString()}
+                status={item.status}
+                payments={mockPayments()}
+                isHistoryOpen={openHistories[item.id]}
+                onToggleHistory={toggleHistory}
+                openRejections={openRejections}
+                onToggleRejection={toggleRejection}
+                onAddPayment={() => navigate("/admin/add-payment", { state: { saleId: item.id } })}
+                onCancel={() => console.log("Cancel Sale", item.id)}
+              />
+            ))}
+          </div>
         </div>
-      </div>
-    </>
-  );
+      </>
+      );
 };
 
-export default SellList;
-
-
+      export default SellList;
