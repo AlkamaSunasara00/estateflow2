@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
-import ExpandableCard from "../../../components/cards/ExpandableCard";
-import api from "../../../api/axiosInstance";
-import { Calendar, Plus, X } from "lucide-react";
 import Sidebar from "../layout/Sidebar";
-import { FiMenu } from "react-icons/fi";
-import { Link, useNavigate } from "react-router-dom";
 import { HiOutlineArrowLeft } from "react-icons/hi";
+import { FiMenu } from "react-icons/fi";
+import { Plus } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../../../api/axiosInstance";
 import { useActiveUser } from "../../../context/ActiveUserContext";
+import ExpandableCard from "../../../components/cards/ExpandableCard";
 
 const BuyList = () => {
   const [buys, setBuys] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [client, setClient] = useState({});
+  const [client, setClient] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [openHistories, setOpenHistories] = useState({});
+  const [openRejections, setOpenRejections] = useState({});
 
   const { userId } = useActiveUser();
   const navigate = useNavigate();
@@ -19,33 +21,32 @@ const BuyList = () => {
   // fetch user
   useEffect(() => {
     if (!userId) return;
-
-    api.get(`/users/${userId}`)
-      .then(res => setClient(res.data))
-      .catch(console.error);
+    api.get(`/users/${userId}`).then(res => setClient(res.data));
   }, [userId]);
 
-  // fetch buys ONLY when userId exists
   useEffect(() => {
-    if (!userId) return;
-    fetchBuys();
-  }, [userId]);
+    api.get("/getbuyproperties").then(res => setBuys(res.data || []));
+  }, []);
 
-  const fetchBuys = async () => {
-    try {
-      setLoading(true);
-      const res = await api.get(`/getbuypropertiesbyuserid/${userId}`);
-      setBuys(res.data || []);
-    } catch (err) {
-      console.error("Failed to fetch buys", err);
-    } finally {
-      setLoading(false);
-    }
+  const toggleHistory = (id) => {
+    setOpenHistories(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const handleNavigateToBuyForm = () => {
-    navigate("/admin/buycard/buysell", { state: { client } });
+  const toggleRejection = (buyId, payId) => {
+    setOpenRejections(prev => ({
+      ...prev,
+      [`${buyId}-${payId}`]: !prev[`${buyId}-${payId}`]
+    }));
   };
+
+  const handleAddBuy = () => navigate("/admin/buycard/buysell");
+
+  if (loading) return <p>Loading...</p>;
+
+  const mockPayments = () => [
+    { id: 1, amount: 15000, status: "Completed", date: "10/11/2025" },
+    { id: 2, amount: 5000, status: "Deleted", date: "12/11/2025", reason: "Invalid proof" },
+  ];
 
   return (
     <>
@@ -57,14 +58,10 @@ const BuyList = () => {
           <Link to="/admin/user-dashboard" className="back-arrow-btn">
             <HiOutlineArrowLeft />
           </Link>
-
-          <h5>{client?.name}</h5>
-
+          <h5>{client?.name || "Client"}</h5>
           <button
             className="form-hamburger-btn"
-            onClick={() =>
-              window.toggleAdminSidebar && window.toggleAdminSidebar()
-            }
+            onClick={() => window.toggleAdminSidebar?.()}
           >
             <FiMenu />
           </button>
@@ -72,63 +69,33 @@ const BuyList = () => {
 
         {/* PAGE CONTENT */}
         <div className="sales-page-container">
-          {loading ? (
-            <div className="sales-loading">
-              Loading...
-            </div>
-          ) : (
-            <>
-              <div className="sales-card-header sales-header">
-                <h2 className="sales-title">Purchases</h2>
-                <button
-                  className="primary-btn add-sell-button"
-                  onClick={handleNavigateToBuyForm}
-                >
-                  <Plus size={16} />
-                  Add Buy
-                </button>
-              </div>
+6          <div className="sales-page-title-bar">
+            <h2 className="sales-page-title">Purchace</h2>
+            <button className="primary-btn add-sell-btn" onClick={handleAddBuy}>
+              Buy Sell
+            </button>
+          </div>
 
-              <div className="sales-divider" />
+          <div className="sales-divider" />
 
-              {buys.length === 0 ? (
-                <p className="empty-state">No purchases found.</p>
-              ) : (
-                buys.map((item, index) => (
-                  <ExpandableCard
-                    key={item.id || index}
-                    headerLeft={
-                      <>
-                        <div className="booking-id">#{index + 1}</div>
-                        <div className="complex-name">{item.title}</div>
-                      </>
-                    }
-                  >
-                    <div className="booking-date">
-                      <Calendar size={16} />
-                      <span>
-                        {new Date(item.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-
-                    <div className="booking-amount-section">
-                      <div className="booking-amount">
-                        Amount:
-                        <span className="amount-value">
-                          ₹{item.amount}
-                        </span>
-                      </div>
-                    </div>
-
-                    <button className="cancel-booking-btn">
-                      <X size={18} />
-                      Cancel Purchase
-                    </button>
-                  </ExpandableCard>
-                ))
-              )}
-            </>
-          )}
+          {buys.map((item, index) => (
+            <ExpandableCard
+              key={item.id}
+              id={item.id}
+              index={index}
+              title={item.title}
+              amount={item.amount}
+              date={new Date(item.created_at).toLocaleDateString()}
+              status={item.status}
+              payments={mockPayments()}
+              isHistoryOpen={openHistories[item.id]}
+              onToggleHistory={toggleHistory}
+              openRejections={openRejections}
+              onToggleRejection={toggleRejection}
+              onAddPayment={() => navigate("/admin/add-payment", { state: { buyId: item.id } })}
+              onCancel={() => console.log("Cancel Buy", item.id)}
+            />
+          ))}
         </div>
       </div>
     </>
