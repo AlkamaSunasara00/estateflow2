@@ -19,6 +19,10 @@ const SellList = () => {
   const { userId } = useActiveUser();
   const navigate = useNavigate();
 
+<<<<<<< HEAD
+=======
+  // fetch user
+>>>>>>> 2904f5a5581353315b0603340facdce236c1015c
   useEffect(() => {
     if (!userId) return;
     api.get(`/users/${userId}`).then(res => setClient(res.data));
